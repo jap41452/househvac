@@ -61,7 +61,7 @@ const FEATURE_STATS = {
 // Icons
 const HomeIcon = () => (<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>);
 const FireIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>);
-const SnowIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>);
+const SnowIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>); 
 const TrashIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 const SunIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>);
 const MoonIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>);
@@ -90,7 +90,6 @@ class OrbitControls {
         this.domElement.addEventListener('wheel', this.onMouseWheel.bind(this));
         this.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-    
     onMouseDown(event) {
         event.preventDefault();
         if (event.button === 0) {
@@ -103,7 +102,6 @@ class OrbitControls {
         this.domElement.addEventListener('mousemove', this.onMouseMove.bind(this));
         this.domElement.addEventListener('mouseup', this.onMouseUp.bind(this));
     }
-    
     onMouseMove(event) {
         event.preventDefault();
         if (this.state === 'rotate') {
@@ -120,13 +118,11 @@ class OrbitControls {
         }
         this.update();
     }
-    
     onMouseUp() {
         this.domElement.removeEventListener('mousemove', this.onMouseMove.bind(this));
         this.domElement.removeEventListener('mouseup', this.onMouseUp.bind(this));
         this.state = 'none';
     }
-    
     onMouseWheel(event) {
         event.preventDefault();
         if (event.deltaY < 0) this.scale /= 0.95; else this.scale *= 0.95;
@@ -566,8 +562,9 @@ function HouseBuilder() {
 
     const renderFloorPlan = () => {
        const scale = 5;
+       // Updated Height to 800 to prevent cutoff
        return (
-            <svg width="800" height="600" className="border border-gray-300 bg-white">
+            <svg width="800" height="800" className="border border-gray-300 bg-white">
                 {floors.map((floor, floorIndex) => (
                     <g key={floor} transform={`translate(50, ${50 + floorIndex * 220})`}>
                         <text x={0} y={-10} fontSize="16" fontWeight="bold" className="uppercase">{floor} Floor</text>
@@ -589,16 +586,16 @@ function HouseBuilder() {
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-[950px] mx-auto">
+            <div className="max-w-[900px] mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className={`text-${themeColor}-600`}><HomeIcon /></div>
                         <h1 className="text-3xl font-bold text-gray-900">Multi-Story House Builder & HVAC Calculator</h1>
                     </div>
 
-                    <div className="grid grid-cols-[2fr_1fr] gap-8">
-                        {/* Left Column: 3D/Floor Plan */}
-                        <div>
+                    <div className="flex gap-6">
+                        {/* Left Column: 3D/Floor Plan (Fixed 600px width) */}
+                        <div className="w-[600px]">
                             <div className="flex gap-2 mb-4">
                                 <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? `bg-${themeColor}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
                                 <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? `bg-${themeColor}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
@@ -619,19 +616,20 @@ function HouseBuilder() {
                             <div className="mb-6 flex justify-center">
                                 {viewMode === '3d' ? (
                                     <div className="w-full">
-                                        <div ref={mountRef} className={`h-[600px] w-full border-4 border-gray-300 rounded-lg ${hvacMode==='cooling'?'bg-cyan-50':'bg-blue-50'}`}></div>
+                                        <div ref={mountRef} className={`h-[750px] w-full border-4 border-gray-300 rounded-lg ${hvacMode==='cooling'?'bg-cyan-50':'bg-blue-50'}`}></div>
                                         <p className="text-xs text-gray-500 mt-2 text-center">Drag to rotate • Right-click to pan • Scroll to zoom</p>
                                     </div>
                                 ) : (
-                                    <div className="w-full overflow-auto h-[600px] border-4 border-gray-300 rounded-lg p-4 bg-gray-50">
+                                    // Increased height to 750px for scrolling view
+                                    <div className="w-full overflow-auto h-[750px] border-4 border-gray-300 rounded-lg p-4 bg-gray-50">
                                         {renderFloorPlan()}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Right Column: HVAC Controls */}
-                        <div className="space-y-6 h-[700px] overflow-y-auto pr-2">
+                        {/* Right Column: HVAC Controls (Fills remaining space) */}
+                        <div className="flex-1 space-y-6 h-[850px] overflow-y-auto pr-2">
                             
                             {/* HVAC CALCULATOR PANEL */}
                             <div className={`bg-${themeColor}-50 border border-${themeColor}-200 rounded-lg p-5`}>
@@ -818,10 +816,10 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<HouseBuilder />);
 
 
-
     </script>
 </body>
 </html>
+
 
 
 
