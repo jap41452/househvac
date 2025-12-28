@@ -15,7 +15,6 @@
 
     <script type="text/babel">
 
-
 const { useState, useEffect, useRef } = React;
 
 // --- CONSTANTS ---
@@ -62,14 +61,12 @@ const FEATURE_STATS = {
 // Icons
 const HomeIcon = () => (<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>);
 const FireIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>);
-const SnowIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>); // Reusing sun as simplified snow/cool icon
+const SnowIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>);
 const TrashIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 const SunIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>);
 const MoonIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>);
-const UserIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>);
-const DropIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>);
 
-// OrbitControls (Standard)
+// OrbitControls
 class OrbitControls {
     constructor(camera, domElement) {
         this.camera = camera;
@@ -171,9 +168,7 @@ function HouseBuilder() {
     const [viewMode, setViewMode] = useState('3d');
     const [selectionMode, setSelectionMode] = useState('exterior');
     const [wallFeatures, setWallFeatures] = useState({});
-    
-    // HVAC Mode State
-    const [hvacMode, setHvacMode] = useState('heating'); // 'heating' or 'cooling'
+    const [hvacMode, setHvacMode] = useState('heating'); 
 
     // Environmental State
     const [outsideTemp, setOutsideTemp] = useState(32);
@@ -189,10 +184,9 @@ function HouseBuilder() {
     const [nightCondition, setNightCondition] = useState('clear'); 
     const [atticRValue, setAtticRValue] = useState(40);
 
-    // Cooling Specific State
-    const [humidity, setHumidity] = useState(50); // Relative Humidity %
-    const [occupants, setOccupants] = useState(4); // Number of people
-    const [appliances, setAppliances] = useState('medium'); // Load level
+    const [humidity, setHumidity] = useState(50); 
+    const [occupants, setOccupants] = useState(4); 
+    const [appliances, setAppliances] = useState('medium'); 
 
     const mountRef = useRef(null);
     const sceneRef = useRef(null);
@@ -208,16 +202,11 @@ function HouseBuilder() {
     const ROOF_PITCH = 3/8;
     const floors = ['basement', 'first', 'second'];
 
-    // Update defaults when mode changes
     useEffect(() => {
         if (hvacMode === 'cooling') {
-            setOutsideTemp(90);
-            setInsideTemp(72);
-            setTimeOfDay('day');
-            setSunVisible(true);
+            setOutsideTemp(90); setInsideTemp(72); setTimeOfDay('day'); setSunVisible(true);
         } else {
-            setOutsideTemp(32);
-            setInsideTemp(70);
+            setOutsideTemp(32); setInsideTemp(70);
         }
     }, [hvacMode]);
 
@@ -255,11 +244,7 @@ function HouseBuilder() {
 
         const groundGeometry = new THREE.PlaneGeometry(200, 200);
         const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x3a7d3a, 
-            roughness: 0.8,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.4 
+            color: 0x3a7d3a, roughness: 0.8, side: THREE.DoubleSide, transparent: true, opacity: 0.4 
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -314,13 +299,11 @@ function HouseBuilder() {
             ambientLightRef.current.intensity = sunVisible ? 0.6 : 0.4;
             sunLightRef.current.intensity = sunVisible ? 0.9 : 0.2;
             sunLightRef.current.color.setHex(0xffffff);
-            
             const latRad = latitude * (Math.PI / 180);
             const sunDist = 100;
             const sunY = Math.cos(latRad) * sunDist;
             const sunZ = Math.sin(latRad) * sunDist;
             sunLightRef.current.position.set(20, sunY, sunZ);
-
         } else {
             sceneRef.current.background = new THREE.Color(0x050520);
             ambientLightRef.current.intensity = 0.2;
@@ -339,9 +322,7 @@ function HouseBuilder() {
         Object.values(wallMeshesRef.current).forEach(mesh => sceneRef.current.remove(mesh));
         roofMeshesRef.current.forEach(mesh => sceneRef.current.remove(mesh));
         sceneRef.current.children = sceneRef.current.children.filter(c => 
-            c.type !== 'Mesh' || 
-            (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || 
-            c.geometry.type === 'BoxGeometry' && c.scale.y === 0.5 
+            c.type !== 'Mesh' || (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || c.geometry.type === 'BoxGeometry' && c.scale.y === 0.5 
         );
 
         wallMeshesRef.current = {};
@@ -394,7 +375,6 @@ function HouseBuilder() {
                     );
                     const featureMat = new THREE.MeshStandardMaterial({ color: stats.color, roughness: 0.2, metalness: 0.8 });
                     const featureMesh = new THREE.Mesh(featureGeom, featureMat);
-                    
                     const offset = -wallWidth/2 + (spacing * (idx + 1));
                     let fx = 0, fz = 0;
                     const yOffset = feature.type.includes('door') ? (-WALL_HEIGHT/2 + stats.height/2) : 0; 
@@ -402,7 +382,6 @@ function HouseBuilder() {
                     if (dir.id === 'south') { fx = -offset; fz = 0; } 
                     if (dir.id === 'east')  { fx = 0; fz = -offset; }
                     if (dir.id === 'west')  { fx = 0; fz = offset; }
-
                     featureMesh.position.set(mesh.position.x + fx, mesh.position.y + yOffset, mesh.position.z + fz);
                     sceneRef.current.add(featureMesh);
                     roofMeshesRef.current.push(featureMesh);
@@ -496,7 +475,6 @@ function HouseBuilder() {
         return INSULATION_OPTIONS.find(opt => opt.id === insulationId);
     };
 
-    // ---- HVAC CALCULATIONS ----
     const calculateHVAC = () => {
         const walls = getWallData();
         let totalLoad = 0;
@@ -506,7 +484,6 @@ function HouseBuilder() {
             let featureArea = 0;
             let featureLoad = 0;
             
-            // HEATING: (In - Out), COOLING: (Out - In)
             let tempDiff = 0;
             if (hvacMode === 'heating') {
                 tempDiff = wall.floor === 'basement' ? (insideTemp - groundTemp) : (insideTemp - outsideTemp);
@@ -519,86 +496,60 @@ function HouseBuilder() {
                 const stats = FEATURE_STATS[f.type];
                 const area = stats.width * stats.height;
                 featureArea += area;
-                
                 let uValue = 1 / stats.rValue;
-                // Night Clear Sky Penalty (Heating only)
-                if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') {
-                    uValue *= 1.15; 
-                }
-                
+                if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') uValue *= 1.15; 
                 let load = area * uValue * tempDiff;
 
-                // COOLING SOLAR GAIN through windows
                 if (hvacMode === 'cooling' && f.type.includes('window') && timeOfDay === 'day' && sunVisible) {
-                    const SHGC = 0.5; // Average
-                    let solarIntensity = 200; // Peak BTU/sqft
-                    
-                    // Directional Penalties for Cooling
+                    const SHGC = 0.5;
+                    let solarIntensity = 200;
                     if (wall.orientation === 'east' || wall.orientation === 'west') solarIntensity *= 1.2;
                     else if (wall.orientation === 'south') solarIntensity *= Math.sin(latitude * Math.PI/180);
                     else if (wall.orientation === 'north') solarIntensity *= 0.2;
-
                     load += (area * SHGC * solarIntensity);
                 } else if (hvacMode === 'heating' && f.type.includes('window') && timeOfDay === 'day' && sunVisible && wall.orientation === 'south') {
-                    // Heating Solar Gain (Bonus)
                     const solarIntensity = 20 * Math.sin(latitude * Math.PI/180);
-                    load -= (area * solarIntensity); // Subtract gain from load
+                    load -= (area * solarIntensity);
                 }
-
                 featureLoad += load;
             });
 
             const netWallArea = Math.max(0, wall.area - featureArea);
             const insulation = getWallInsulation(wall.id);
             let rValue = insulation.rValue + 3;
-            
-            // Wind Penalty (Heating)
-            if (hvacMode === 'heating' && wall.floor !== 'basement' && wall.orientation === windDirection) {
-                rValue *= 0.85;
-            }
+            if (hvacMode === 'heating' && wall.floor !== 'basement' && wall.orientation === windDirection) rValue *= 0.85;
 
             const wallLoad = (netWallArea / rValue) * tempDiff;
             totalLoad += (wallLoad + featureLoad);
         });
 
-        // Roof Load
         const roofArea = dimensions.length * dimensions.width;
         let effectiveAtticR = atticRValue;
-        if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') {
-            effectiveAtticR *= 0.8; // Radiant cooling penalty
-        }
+        if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') effectiveAtticR *= 0.8;
         
         let roofTempDiff = 0;
         if (hvacMode === 'heating') {
             roofTempDiff = Math.max(0, insideTemp - outsideTemp);
         } else {
-            // Cooling Sol-Air Calculation
             let effectiveOutside = outsideTemp;
             if (timeOfDay === 'day' && sunVisible) {
                 const roofMat = ROOF_MATERIALS.find(m => m.id === roofMaterial);
                 const reflectivity = roofMat ? roofMat.reflectivity : 0.1;
-                // Black roof gets hotter (+50 deg), White roof (+15 deg)
                 effectiveOutside += (1 - reflectivity) * 50; 
             }
             roofTempDiff = Math.max(0, effectiveOutside - insideTemp);
         }
         totalLoad += (roofArea / effectiveAtticR) * roofTempDiff;
 
-        // Infiltration & Internal Loads
         const volume = dimensions.length * dimensions.width * (floors.length * WALL_HEIGHT);
         const acph = 0.5 + (windSpeed * 0.05);
         const infiltrationLoad = volume * 0.018 * Math.abs(insideTemp - outsideTemp) * acph;
         totalLoad += infiltrationLoad;
 
-        // COOLING SPECIFIC LOADS
         if (hvacMode === 'cooling') {
-            // Internal Heat
-            const peopleLoad = occupants * 450; // BTU/person
+            const peopleLoad = occupants * 450;
             const applianceLoad = appliances === 'high' ? 3000 : (appliances === 'medium' ? 1500 : 500);
             totalLoad += peopleLoad + applianceLoad;
-
-            // Latent Load (Humidity Multiplier)
-            // Simple approach: Above 50%, add 1% load per 2% humidity
             if (humidity > 50) {
                 const factor = 1 + ((humidity - 50) / 100);
                 totalLoad *= factor;
@@ -609,7 +560,6 @@ function HouseBuilder() {
     };
 
     const finalLoad = calculateHVAC();
-    // Heating = BTUs, Cooling = Tons (12000 BTU)
     const displayValue = hvacMode === 'heating' ? finalLoad.toLocaleString() : (finalLoad / 12000).toFixed(2);
     const displayUnit = hvacMode === 'heating' ? 'BTU/hr' : 'Tons';
     const themeColor = hvacMode === 'heating' ? 'orange' : 'cyan';
@@ -639,35 +589,23 @@ function HouseBuilder() {
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-[950px] mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className={`text-${themeColor}-600`}><HomeIcon /></div>
                         <h1 className="text-3xl font-bold text-gray-900">Multi-Story House Builder & HVAC Calculator</h1>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-[2fr_1fr] gap-8">
                         {/* Left Column: 3D/Floor Plan */}
-                        <div className="lg:col-span-2">
+                        <div>
                             <div className="flex gap-2 mb-4">
                                 <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? `bg-${themeColor}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
                                 <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? `bg-${themeColor}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
                             </div>
 
-                            <div className="mb-6 flex justify-center">
-                                {viewMode === '3d' ? (
-                                    <div>
-                                        <div ref={mountRef} className={`h-96 w-full border-4 border-gray-300 rounded-lg ${hvacMode==='cooling'?'bg-cyan-50':'bg-blue-50'}`}></div>
-                                        <p className="text-xs text-gray-500 mt-2 text-center">Drag to rotate • Right-click to pan • Scroll to zoom</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-auto h-96 border-4 border-gray-300 rounded-lg p-4 bg-gray-50">
-                                        {renderFloorPlan()}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 mb-6">
+                            {/* MOVED INPUTS HERE */}
+                            <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Length (ft)</label>
                                     <input type="number" value={dimensions.length} onChange={(e) => setDimensions(prev => ({ ...prev, length: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
@@ -677,10 +615,23 @@ function HouseBuilder() {
                                     <input type="number" value={dimensions.width} onChange={(e) => setDimensions(prev => ({ ...prev, width: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
                                 </div>
                             </div>
+
+                            <div className="mb-6 flex justify-center">
+                                {viewMode === '3d' ? (
+                                    <div className="w-full">
+                                        <div ref={mountRef} className={`h-[600px] w-full border-4 border-gray-300 rounded-lg ${hvacMode==='cooling'?'bg-cyan-50':'bg-blue-50'}`}></div>
+                                        <p className="text-xs text-gray-500 mt-2 text-center">Drag to rotate • Right-click to pan • Scroll to zoom</p>
+                                    </div>
+                                ) : (
+                                    <div className="w-full overflow-auto h-[600px] border-4 border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        {renderFloorPlan()}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Right Column: HVAC Controls */}
-                        <div className="space-y-6 h-[40rem] overflow-y-auto pr-2">
+                        <div className="space-y-6 h-[700px] overflow-y-auto pr-2">
                             
                             {/* HVAC CALCULATOR PANEL */}
                             <div className={`bg-${themeColor}-50 border border-${themeColor}-200 rounded-lg p-5`}>
@@ -866,9 +817,12 @@ function HouseBuilder() {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<HouseBuilder />);
 
+
+
     </script>
 </body>
 </html>
+
 
 
 
