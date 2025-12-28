@@ -15,7 +15,6 @@
 
     <script type="text/babel">
 
-
 const { useState, useEffect, useRef } = React;
 
         // --- CONSTANTS ---
@@ -204,6 +203,7 @@ const { useState, useEffect, useRef } = React;
 
                     if (intersects.length > 0) {
                         let target = intersects[0].object;
+                        // Traverse up if we hit a child feature
                         while(target.parent && !target.userData.wallId) {
                             target = target.parent;
                         }
@@ -229,7 +229,8 @@ const { useState, useEffect, useRef } = React;
             const buildHouse = () => {
                 if (!sceneRef.current) return;
                 Object.values(wallMeshesRef.current).forEach(mesh => sceneRef.current.remove(mesh));
-                sceneRef.current.children = sceneRef.current.children.filter(c => c.type !== 'Mesh' || c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2); 
+                // Clear non-static meshes
+                sceneRef.current.children = sceneRef.current.children.filter(c => c.type !== 'Mesh' || (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || c.type === 'GridHelper'); 
 
                 wallMeshesRef.current = {};
                 const wallThickness = 0.5;
@@ -279,7 +280,7 @@ const { useState, useEffect, useRef } = React;
                         sceneRef.current.add(mesh);
                         wallMeshesRef.current[wallId] = mesh;
 
-                        // Stickers
+                        // Stickers (Windows/Doors)
                         const features = wallFeatures[wallId] || [];
                         const wallWidth = dir.id === 'north' || dir.id === 'south' ? dimensions.length : dimensions.width;
                         const spacing = wallWidth / (features.length + 1);
@@ -318,6 +319,7 @@ const { useState, useEffect, useRef } = React;
                         });
                     });
 
+                    // Trim
                     const trim = new THREE.Mesh(
                         new THREE.BoxGeometry(dimensions.length + 0.8, 0.4, dimensions.width + 0.8),
                         new THREE.MeshStandardMaterial({ color: 0xFFFFFF })
@@ -341,7 +343,8 @@ const { useState, useEffect, useRef } = React;
 
                 const roofLen = Math.sqrt((dimensions.width/2)**2 + roofRise**2);
                 const roofAng = Math.atan2(roofRise, dimensions.width/2);
-                const roofMeshMat = new THREE.MeshStandardMaterial({ color: 0x808080, side: THREE.DoubleSide });
+                const roofMat = ROOF_MATERIALS.find(m => m.id === roofMaterial) || ROOF_MATERIALS[0];
+                const roofMeshMat = new THREE.MeshStandardMaterial({ color: roofMat.color, side: THREE.DoubleSide });
                 
                 const nRoof = new THREE.Mesh(new THREE.PlaneGeometry(dimensions.length+1, roofLen), roofMeshMat);
                 nRoof.position.set(0, roofY+roofRise/2, -dimensions.width/4); nRoof.rotation.x = -Math.PI/2 - roofAng;
@@ -427,14 +430,23 @@ const { useState, useEffect, useRef } = React;
                         {floors.map((floor, floorIndex) => (
                             <g key={floor} transform={`translate(50, ${50 + floorIndex * 220})`}>
                                 <text x={0} y={-10} fontSize="16" fontWeight="bold" className="uppercase">{floor} Floor</text>
+                                {/* North */}
                                 <rect x={0} y={0} width={dimensions.length * scale} height={20} fill={`#${getWallInsulation(`${floor}-north`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-north`)} />
                                 <text x={dimensions.length * scale / 2} y={12} textAnchor="middle" fontSize="10" fill="#1f2937">N</text>
+                                
+                                {/* South */}
                                 <rect x={0} y={dimensions.width * scale - 20} width={dimensions.length * scale} height={20} fill={`#${getWallInsulation(`${floor}-south`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-south`)} />
                                 <text x={dimensions.length * scale / 2} y={dimensions.width * scale - 8} textAnchor="middle" fontSize="10" fill="#1f2937">S</text>
+                                
+                                {/* West */}
                                 <rect x={0} y={20} width={20} height={dimensions.width * scale - 40} fill={`#${getWallInsulation(`${floor}-west`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-west`)} />
                                 <text x={10} y={dimensions.width * scale / 2} textAnchor="middle" fontSize="10" fill="#1f2937">W</text>
+                                
+                                {/* East */}
                                 <rect x={dimensions.length * scale - 20} y={20} width={20} height={dimensions.width * scale - 40} fill={`#${getWallInsulation(`${floor}-east`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-east`)} />
                                 <text x={dimensions.length * scale - 10} y={dimensions.width * scale / 2} textAnchor="middle" fontSize="10" fill="#1f2937">E</text>
+                                
+                                {/* Interior */}
                                 <rect x={20} y={20} width={dimensions.length * scale - 40} height={dimensions.width * scale - 40} fill="#f3f4f6" stroke="none" />
                                 <text x={dimensions.length * scale / 2} y={dimensions.width * scale + 20} textAnchor="middle" fontSize="12">{dimensions.length}' × {dimensions.width}'</text>
                             </g>
@@ -458,109 +470,162 @@ const { useState, useEffect, useRef } = React;
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Left: View */}
+                            {/* Main Grid Layout */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Left Column: 3D/Floor Plan */}
                                 <div className="lg:col-span-2">
-                                     <div className="flex gap-2 mb-4">
+                                    <div className="flex gap-2 mb-4">
                                         <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
                                         <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
                                     </div>
-                                    
-                                    {viewMode === '3d' ? (
-                                        <>
-                                            <div ref={mountRef} className="h-96 w-full border-4 border-gray-300 rounded-lg bg-blue-50"></div>
-                                            <div className="flex gap-4 mt-4 text-sm text-gray-600 justify-center">
-                                                <span>Left-Click: Rotate</span>
-                                                <span>Right-Click: Pan</span>
-                                                <span>Scroll: Zoom</span>
-                                                <span>Click Walls to Select</span>
+
+                                    <div className="mb-6 flex justify-center">
+                                        {viewMode === '3d' ? (
+                                            <div>
+                                                <div ref={mountRef} className="h-96 w-full border-4 border-gray-300 rounded-lg bg-blue-50"></div>
+                                                <p className="text-xs text-gray-500 mt-2 text-center">Drag to rotate • Right-click to pan • Scroll to zoom</p>
                                             </div>
-                                        </>
-                                    ) : (
-                                        <div className="overflow-auto h-96 border-4 border-gray-300 rounded-lg p-4">
-                                            {renderFloorPlan()}
+                                        ) : (
+                                            <div className="overflow-auto h-96 border-4 border-gray-300 rounded-lg p-4 bg-gray-50">
+                                                {renderFloorPlan()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Dimensions */}
+                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Length (ft)</label>
+                                            <input type="number" value={dimensions.length} onChange={(e) => setDimensions(prev => ({ ...prev, length: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
                                         </div>
-                                    )}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Width (ft)</label>
+                                            <input type="number" value={dimensions.width} onChange={(e) => setDimensions(prev => ({ ...prev, width: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Right: Controls */}
-                                <div className="space-y-4 h-[32rem] overflow-y-auto pr-2">
-                                    {/* Env Controls - RESTORED */}
-                                    <div className="bg-gray-100 p-3 rounded text-sm">
-                                        <h3 className="font-bold mb-2">Environment</h3>
-                                        <div className="grid grid-cols-2 gap-2 mb-2">
-                                            <div><label>Outside °F</label><input type="number" value={outsideTemp} onChange={e=>setOutsideTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
-                                            <div><label>Inside °F</label><input type="number" value={insideTemp} onChange={e=>setInsideTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 mb-2">
-                                            <div><label>Ground °F</label><input type="number" value={groundTemp} onChange={e=>setGroundTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
-                                            <div><label>Wind mph</label><input type="number" value={windSpeed} onChange={e=>setWindSpeed(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
-                                        </div>
-                                         <div className="mb-2">
-                                            <label>Wind Direction</label>
-                                            <select value={windDirection} onChange={(e) => setWindDirection(e.target.value)} className="w-full p-1 border rounded">
-                                                <option value="north">North</option>
-                                                <option value="south">South</option>
-                                                <option value="east">East</option>
-                                                <option value="west">West</option>
-                                            </select>
+                                {/* Right Column: HVAC Controls & Materials */}
+                                <div className="space-y-6 h-[40rem] overflow-y-auto pr-2">
+                                    
+                                    {/* HVAC CALCULATOR PANEL */}
+                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-5">
+                                        <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+                                            <FireIcon /> Environmental Inputs
+                                        </h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Outside Temp (°F)</label>
+                                                    <input type="number" value={outsideTemp} onChange={(e) => setOutsideTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Ground Temp (°F)</label>
+                                                    <input type="number" value={groundTemp} onChange={(e) => setGroundTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Inside Temp (°F)</label>
+                                                    <input type="number" value={insideTemp} onChange={(e) => setInsideTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Wind Speed (mph)</label>
+                                                    <input type="number" value={windSpeed} onChange={(e) => setWindSpeed(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-xs font-semibold text-orange-800 mb-1">Wind Direction</label>
+                                                <select value={windDirection} onChange={(e) => setWindDirection(e.target.value)} className="w-full px-2 py-1 border border-orange-200 rounded text-sm bg-white">
+                                                    <option value="north">North</option>
+                                                    <option value="south">South</option>
+                                                    <option value="east">East</option>
+                                                    <option value="west">West</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Wall Editor */}
-                                    {selectedWall ? (
-                                        <div className="bg-blue-50 p-3 rounded border border-blue-200">
-                                            <h3 className="font-bold text-blue-900 mb-2">Edit: {selectedWall}</h3>
-                                            
-                                            <div className="flex gap-2 mb-3">
-                                                <button onClick={()=>setSelectionMode('exterior')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='exterior'?'bg-blue-600 text-white':'bg-white'}`}>Ext</button>
-                                                <button onClick={()=>setSelectionMode('insulation')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='insulation'?'bg-blue-600 text-white':'bg-white'}`}>Insul</button>
-                                                <button onClick={()=>setSelectionMode('features')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='features'?'bg-blue-600 text-white':'bg-white'}`}>Feat.</button>
+                                    {/* Selection Controls */}
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        {selectedWall ? (
+                                            <div className="mb-4">
+                                                <h3 className="font-semibold text-gray-900">Edit: {selectedWall.toUpperCase()}</h3>
+                                                <p className="text-xs text-gray-600 mb-2">Current R-Value: {getWallInsulation(selectedWall).rValue + 3} (Total)</p>
                                             </div>
+                                        ) : (
+                                            <div className="mb-4 text-sm text-gray-500 italic">Select a wall to edit materials</div>
+                                        )}
 
+                                        <div className="flex gap-2 mb-4">
+                                            <button onClick={() => setSelectionMode('exterior')} className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectionMode === 'exterior' ? 'bg-gray-800 text-white' : 'bg-gray-200'}`}>Ext</button>
+                                            <button onClick={() => setSelectionMode('insulation')} className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectionMode === 'insulation' ? 'bg-gray-800 text-white' : 'bg-gray-200'}`}>Insul</button>
+                                            <button onClick={() => setSelectionMode('features')} className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectionMode === 'features' ? 'bg-gray-800 text-white' : 'bg-gray-200'}`}>Features</button>
+                                        </div>
+
+                                        <div className="h-64 overflow-y-auto">
                                             {selectionMode === 'exterior' && (
-                                                <div className="grid grid-cols-2 gap-1">
-                                                    {EXTERIOR_MATERIALS.map(m => (
-                                                        <button key={m.id} onClick={()=>setWallExterior({...wallExterior, [selectedWall]: m.id})} className="text-xs p-1 bg-white border rounded text-left">{m.name}</button>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {EXTERIOR_MATERIALS.map(material => (
+                                                        <button key={material.id} onClick={() => setWallExterior({...wallExterior, [selectedWall]: material.id})} disabled={!selectedWall} className={`p-2 rounded border text-left ${selectedWall && wallExterior[selectedWall] === material.id ? 'border-green-600 bg-green-50' : 'border-gray-300'} ${!selectedWall && 'opacity-50'}`}>
+                                                            <div className="w-full h-4 rounded mb-1" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
+                                                            <div className="text-xs font-medium">{material.name}</div>
+                                                        </button>
                                                     ))}
                                                 </div>
                                             )}
-
-                                             {selectionMode === 'insulation' && (
-                                                <div className="grid grid-cols-1 gap-1">
-                                                    {INSULATION_OPTIONS.map(m => (
-                                                        <button key={m.id} onClick={()=>setWallInsulation({...wallInsulation, [selectedWall]: m.id})} className="text-xs p-1 bg-white border rounded text-left flex justify-between">
-                                                            <span>{m.name}</span>
-                                                            <span className="text-gray-500">R-{m.rValue}</span>
+                                            
+                                            {selectionMode === 'insulation' && (
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {INSULATION_OPTIONS.map(option => (
+                                                        <button key={option.id} onClick={() => setWallInsulation({...wallInsulation, [selectedWall]: option.id})} disabled={!selectedWall} className={`p-2 rounded border text-left flex justify-between items-center ${selectedWall && wallInsulation[selectedWall] === option.id ? 'border-blue-600 bg-blue-50' : 'border-gray-300'} ${!selectedWall && 'opacity-50'}`}>
+                                                            <div>
+                                                                <div className="text-xs font-medium">{option.name}</div>
+                                                                <div className="text-xs text-gray-500">R-{option.rValue}</div>
+                                                            </div>
+                                                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: `#${option.color.toString(16).padStart(6, '0')}` }}></div>
                                                         </button>
                                                     ))}
                                                 </div>
                                             )}
 
-                                            {selectionMode === 'features' && (
+                                            {selectionMode === 'features' && selectedWall && (
                                                 <div className="space-y-2">
                                                     <div className="flex gap-1">
-                                                        <button onClick={()=>addFeature('window-std')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Std</button>
-                                                        <button onClick={()=>addFeature('window-pic')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Pic</button>
-                                                        <button onClick={()=>addFeature('door')} className="flex-1 bg-amber-100 p-1 text-xs border border-amber-300 rounded hover:bg-amber-200">+ Door</button>
+                                                        <button onClick={()=>addFeature('window-std')} className="flex-1 bg-green-100 p-2 text-xs border border-green-300 rounded hover:bg-green-200 font-bold">+ Win</button>
+                                                        <button onClick={()=>addFeature('window-pic')} className="flex-1 bg-green-100 p-2 text-xs border border-green-300 rounded hover:bg-green-200 font-bold">+ Pic</button>
+                                                        <button onClick={()=>addFeature('door')} className="flex-1 bg-amber-100 p-2 text-xs border border-amber-300 rounded hover:bg-amber-200 font-bold">+ Door</button>
                                                     </div>
                                                     
                                                     <div className="mt-2 border-t pt-2">
                                                         <div className="text-xs font-bold text-gray-500 mb-1">Current Features:</div>
                                                         {(wallFeatures[selectedWall] || []).map((f, i) => (
-                                                            <div key={f.id} className="flex justify-between items-center bg-white p-1 mb-1 rounded border text-xs">
+                                                            <div key={f.id} className="flex justify-between items-center bg-white p-2 mb-1 rounded border text-xs">
                                                                 <span>{FEATURE_STATS[f.type].name}</span>
-                                                                <button onClick={()=>removeFeature(selectedWall, f.id)} className="text-red-500"><TrashIcon/></button>
+                                                                <button onClick={()=>removeFeature(selectedWall, f.id)} className="text-red-500 hover:bg-red-50 rounded p-1"><TrashIcon/></button>
                                                             </div>
                                                         ))}
-                                                        {(!wallFeatures[selectedWall] || wallFeatures[selectedWall].length === 0) && <div className="text-xs italic text-gray-400">None</div>}
+                                                        {(!wallFeatures[selectedWall] || wallFeatures[selectedWall].length === 0) && <div className="text-xs italic text-gray-400">No features added</div>}
                                                     </div>
                                                 </div>
                                             )}
+                                            {selectionMode === 'features' && !selectedWall && <div className="text-xs text-gray-400 italic">Select a wall to add features</div>}
                                         </div>
-                                    ) : (
-                                        <div className="p-4 text-center text-gray-500 italic border rounded">Select a wall to add windows/doors</div>
-                                    )}
+                                    </div>
+                                    
+                                    {/* Roof Material Selector */}
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h3 className="text-sm font-semibold mb-2">Roof Material</h3>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {ROOF_MATERIALS.map(material => (
+                                                <button key={material.id} onClick={() => setRoofMaterial(material.id)} className={`p-2 rounded border text-left ${roofMaterial === material.id ? 'border-purple-600 bg-purple-50' : 'border-gray-300'}`}>
+                                                    <div className="w-full h-4 rounded mb-1" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
+                                                    <div className="text-xs font-medium">{material.name}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -568,6 +633,10 @@ const { useState, useEffect, useRef } = React;
                 </div>
             );
         }
+
+
+
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<HouseBuilder />);
 
@@ -575,6 +644,7 @@ const { useState, useEffect, useRef } = React;
     </script>
 </body>
 </html>
+
 
 
 
