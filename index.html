@@ -488,13 +488,9 @@ const buildHouse = () => {
                 const northRoofGeom = new THREE.PlaneGeometry(dimensions.length, roofSlantLength);
                 const northRoof = new THREE.Mesh(northRoofGeom, roofMaterialMesh);
                 
-                // FIX: 
-                // 1. Position Y is the midpoint of the slope height (Base + Half Rise).
-                // 2. Position Z is the midpoint of the slope width (Halfway between ridge and wall).
-                // 3. Rotation: Start flat (-PI/2), then pitch up by subtracting angle (since we are on the -Z side).
+                // FIX: Swapped the sign to MINUS roofAngle to pitch UP towards the center
                 northRoof.position.set(0, roofY + roofRise / 2, -dimensions.width / 4);
-                northRoof.rotation.x = -Math.PI / 2 + roofAngle;
-                northRoof.rotation.y = Math.PI; // Spin it so the "front" faces out
+                northRoof.rotation.x = -Math.PI / 2 - roofAngle; 
                 
                 northRoof.castShadow = true;
                 northRoof.receiveShadow = true;
@@ -505,15 +501,18 @@ const buildHouse = () => {
                 const southRoofGeom = new THREE.PlaneGeometry(dimensions.length, roofSlantLength);
                 const southRoof = new THREE.Mesh(southRoofGeom, roofMaterialMesh.clone());
                 
-                // FIX: Similar logic, but Z is positive, and rotation is standard X minus angle.
+                // FIX: Swapped the sign to PLUS roofAngle to pitch UP towards the center
                 southRoof.position.set(0, roofY + roofRise / 2, dimensions.width / 4);
-                southRoof.rotation.x = -Math.PI / 2 - roofAngle; 
+                southRoof.rotation.x = -Math.PI / 2 + roofAngle;
                 
                 southRoof.castShadow = true;
                 southRoof.receiveShadow = true;
                 sceneRef.current.add(southRoof);
                 roofMeshesRef.current.push(southRoof);
             };
+
+
+
             const getWallData = () => {
                 const walls = [];
                 
@@ -926,3 +925,4 @@ const buildHouse = () => {
     </script>
 </body>
 </html>
+
