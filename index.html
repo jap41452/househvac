@@ -51,12 +51,12 @@ const { useState, useEffect, useRef } = React;
         const FireIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>);
         const TrashIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 
-        // OrbitControls Class (Minimally included for brevity, assumed standard from previous turn)
+        // OrbitControls Class
         class OrbitControls {
             constructor(camera, domElement) {
                 this.camera = camera;
                 this.domElement = domElement;
-                this.target = new THREE.Vector3(0, 0, 0); // Focus on ground center
+                this.target = new THREE.Vector3(0, 0, 0); 
                 this.minDistance = 20;
                 this.maxDistance = 200;
                 this.rotateSpeed = 0.5;
@@ -112,7 +112,6 @@ const { useState, useEffect, useRef } = React;
             const [selectedWall, setSelectedWall] = useState(null);
             const [wallInsulation, setWallInsulation] = useState({});
             const [wallExterior, setWallExterior] = useState({});
-            // New State for Windows/Doors: { 'wallId': [ {type: 'window-std', id: 123}, ... ] }
             const [wallFeatures, setWallFeatures] = useState({}); 
             const [roofMaterial, setRoofMaterial] = useState('asphalt-gray');
             const [viewMode, setViewMode] = useState('3d');
@@ -143,10 +142,10 @@ const { useState, useEffect, useRef } = React;
                 sceneRef.current = scene;
 
                 const camera = new THREE.PerspectiveCamera(60, 800 / 600, 0.1, 1000);
-                camera.position.set(60, 20, 60); // Lower angle to see basement better
+                camera.position.set(60, 20, 60); 
                 cameraRef.current = camera;
 
-                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // Alpha for transparency
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                 renderer.setSize(800, 600);
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -170,15 +169,15 @@ const { useState, useEffect, useRef } = React;
                     color: 0x3a7d3a, 
                     roughness: 0.8,
                     side: THREE.DoubleSide,
-                    transparent: true, // Enable transparency
-                    opacity: 0.4       // 40% visible
+                    transparent: true, 
+                    opacity: 0.4       
                 });
                 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
                 ground.rotation.x = -Math.PI / 2;
                 ground.receiveShadow = true;
                 scene.add(ground);
 
-                // Grid helper (Make it subtle so it doesn't block the view)
+                // Grid helper
                 const gridHelper = new THREE.GridHelper(100, 50, 0x000000, 0x000000);
                 gridHelper.material.opacity = 0.2;
                 gridHelper.material.transparent = true;
@@ -201,11 +200,9 @@ const { useState, useEffect, useRef } = React;
                     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
                     raycaster.setFromCamera(mouse, camera);
-                    // Only intersect walls, not the features (for selection simplicity)
                     const intersects = raycaster.intersectObjects(Object.values(wallMeshesRef.current));
 
                     if (intersects.length > 0) {
-                        // Traverse up to find the wall mesh in case we hit a child feature
                         let target = intersects[0].object;
                         while(target.parent && !target.userData.wallId) {
                             target = target.parent;
@@ -225,18 +222,14 @@ const { useState, useEffect, useRef } = React;
                 };
             }, [viewMode]);
 
-            // Rebuild when these change
             useEffect(() => {
                 if (viewMode === '3d') buildHouse();
             }, [dimensions, wallInsulation, wallExterior, roofMaterial, wallFeatures]);
 
             const buildHouse = () => {
                 if (!sceneRef.current) return;
-
-                // Cleanup
                 Object.values(wallMeshesRef.current).forEach(mesh => sceneRef.current.remove(mesh));
-                // Note: Roofs/Trim usually need tracking too, simple clear for brevity:
-                sceneRef.current.children = sceneRef.current.children.filter(c => c.type !== 'Mesh' || c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2); // Keep ground/lights
+                sceneRef.current.children = sceneRef.current.children.filter(c => c.type !== 'Mesh' || c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2); 
 
                 wallMeshesRef.current = {};
                 const wallThickness = 0.5;
@@ -265,11 +258,10 @@ const { useState, useEffect, useRef } = React;
                         const wallId = `${floor}-${dir.id}`;
                         const exterior = getWallExterior(wallId);
                         
-                        // Phantom Basement Material vs Standard
                         let material;
                         if (isBasement) {
                             material = new THREE.MeshPhysicalMaterial({
-                                color: 0x708090, // Slate grey
+                                color: 0x708090, 
                                 transparent: true,
                                 opacity: 0.7,
                                 roughness: 0.5,
@@ -279,26 +271,17 @@ const { useState, useEffect, useRef } = React;
                             material = new THREE.MeshStandardMaterial({ color: exterior.color });
                         }
 
-                        // Use a Group or Parent Mesh for the wall
-                        // We use the Mesh as the parent. Note: Scale for East/West is handled by Geometry, not Scale, so child placement is easier.
                         const mesh = new THREE.Mesh(new THREE.BoxGeometry(...dir.dim), material);
                         mesh.position.set(...dir.pos);
-                        // No rotation on Mesh typically for BoxGeometry placement logic used here, 
-                        // BUT for stickers to work easily, we want the mesh local coords to align with the face.
-                        // However, current logic places boxes at world coords. 
-                        // Let's attach features as children. 
-                        
                         mesh.castShadow = !isBasement;
                         mesh.receiveShadow = true;
                         mesh.userData.wallId = wallId;
                         sceneRef.current.add(mesh);
                         wallMeshesRef.current[wallId] = mesh;
 
-                        // --- RENDER FEATURES (STICKERS) ---
+                        // Stickers
                         const features = wallFeatures[wallId] || [];
                         const wallWidth = dir.id === 'north' || dir.id === 'south' ? dimensions.length : dimensions.width;
-                        
-                        // Calculate spacing
                         const spacing = wallWidth / (features.length + 1);
 
                         features.forEach((feature, idx) => {
@@ -316,44 +299,25 @@ const { useState, useEffect, useRef } = React;
                             });
                             
                             const featureMesh = new THREE.Mesh(featureGeom, featureMat);
-                            
-                            // Positioning logic:
-                            // We need to place it relative to the wall center. 
-                            // Since the wall mesh is already positioned, if we add as child, we use local coords.
-                            // But `mesh` is BoxGeometry which doesn't have rotation applied, it has dimensions.
-                            
-                            // Let's place it in World Space relative to the wall to keep it simple with current code structure.
-                            // X/Z shift based on index
                             const offset = -wallWidth/2 + (spacing * (idx + 1));
                             
-                            let fx = 0, fy = 0, fz = 0;
-                            // Vertical pos: Windows typically y=1 or 2 relative to floor. Doors y= -1 (bottom)
+                            let fx = 0, fz = 0;
                             const yOffset = feature.type.includes('door') ? (-WALL_HEIGHT/2 + stats.height/2) : 0; 
 
                             if (dir.id === 'north') { fx = offset; fz = 0; }
-                            if (dir.id === 'south') { fx = -offset; fz = 0; } // Invert for South
+                            if (dir.id === 'south') { fx = -offset; fz = 0; } 
                             if (dir.id === 'east')  { fx = 0; fz = -offset; }
                             if (dir.id === 'west')  { fx = 0; fz = offset; }
 
-                            // We add it as a child of the wall mesh to simplify the "sticking out" math
-                            // Local coordinates of the wall mesh:
-                            // Width is X, Height is Y, Depth is Z (Thickness) for N/S walls? 
-                            // Actually my BoxGeometry creation above changes X/Z based on orientation.
-                            // So "Thickness" is always the thin dimension.
-                            
-                            // Let's stick to World Coordinates relative to wall center for robustness here
                             featureMesh.position.set(
                                 mesh.position.x + fx, 
                                 mesh.position.y + yOffset, 
                                 mesh.position.z + fz
                             );
-                            
                             sceneRef.current.add(featureMesh);
-                            // We track it in a separate list if we wanted to delete, but for now we rebuild whole house
                         });
                     });
 
-                    // Trim
                     const trim = new THREE.Mesh(
                         new THREE.BoxGeometry(dimensions.length + 0.8, 0.4, dimensions.width + 0.8),
                         new THREE.MeshStandardMaterial({ color: 0xFFFFFF })
@@ -362,11 +326,10 @@ const { useState, useEffect, useRef } = React;
                     sceneRef.current.add(trim);
                 });
 
-                // Roof (Simple rebuild of previous logic)
+                // Roof
                 const roofY = (floors.length - 1) * WALL_HEIGHT; 
                 const roofRise = (dimensions.width / 2) * ROOF_PITCH;
                 
-                // Gables
                 const gableGeo = new THREE.ShapeGeometry(new THREE.Shape().moveTo(-dimensions.width/2,0).lineTo(dimensions.width/2,0).lineTo(0,roofRise));
                 const gableMat = new THREE.MeshStandardMaterial({ color: 0xE8E8E8, side: THREE.DoubleSide });
                 const wGable = new THREE.Mesh(gableGeo, gableMat);
@@ -376,7 +339,6 @@ const { useState, useEffect, useRef } = React;
                 eGable.position.set(dimensions.length/2, roofY, 0); eGable.rotation.y = -Math.PI/2;
                 sceneRef.current.add(eGable);
 
-                // Roof Planes
                 const roofLen = Math.sqrt((dimensions.width/2)**2 + roofRise**2);
                 const roofAng = Math.atan2(roofRise, dimensions.width/2);
                 const roofMeshMat = new THREE.MeshStandardMaterial({ color: 0x808080, side: THREE.DoubleSide });
@@ -390,7 +352,6 @@ const { useState, useEffect, useRef } = React;
                 sceneRef.current.add(sRoof);
             };
 
-            // --- LOGIC HELPERS ---
             const addFeature = (type) => {
                 if (!selectedWall) return;
                 setWallFeatures(prev => {
@@ -410,11 +371,14 @@ const { useState, useEffect, useRef } = React;
                 const ex = wallExterior[wallId] || 'brick-red';
                 return EXTERIOR_MATERIALS.find(m => m.id === ex) || EXTERIOR_MATERIALS[0];
             };
+            
+            const getWallInsulation = (wallId) => {
+                const ins = wallInsulation[wallId] || 'none';
+                return INSULATION_OPTIONS.find(m => m.id === ins) || INSULATION_OPTIONS[0];
+            };
 
-            // --- UPDATED HEAT CALCULATION ---
             const calculateHVAC = () => {
                 let totalHeatLoss = 0;
-                
                 floors.forEach(floor => {
                     ['north','south','east','west'].forEach(dir => {
                         const wallId = `${floor}-${dir}`;
@@ -422,7 +386,6 @@ const { useState, useEffect, useRef } = React;
                         const wallL = isLong ? dimensions.length : dimensions.width;
                         const grossArea = wallL * WALL_HEIGHT;
                         
-                        // Features
                         const features = wallFeatures[wallId] || [];
                         let featureArea = 0;
                         let featureLoss = 0;
@@ -433,34 +396,51 @@ const { useState, useEffect, useRef } = React;
                             const stats = FEATURE_STATS[f.type];
                             const area = stats.width * stats.height;
                             featureArea += area;
-                            // Loss = (Area / R) * DeltaT
                             featureLoss += (area / stats.rValue) * tempDiff;
                         });
 
-                        // Net Wall Area
                         const netArea = Math.max(0, grossArea - featureArea);
                         const ins = wallInsulation[wallId] || 'none';
-                        const rValBase = INSULATION_OPTIONS.find(i=>i.id===ins).rValue + 3; // +3 structure
+                        const rValBase = INSULATION_OPTIONS.find(i=>i.id===ins).rValue + 3; 
                         
-                        // Wind effect
                         const rValEff = (dir === windDirection && floor !== 'basement') ? rValBase * 0.85 : rValBase;
-                        
                         const wallLoss = (netArea / rValEff) * tempDiff;
                         
                         totalHeatLoss += wallLoss + featureLoss;
                     });
                 });
 
-                // Roof Loss (Simplified)
                 const roofArea = dimensions.length * dimensions.width;
                 totalHeatLoss += (roofArea / 40) * (insideTemp - outsideTemp);
 
-                // Infiltration
                 const vol = dimensions.length * dimensions.width * (floors.length * WALL_HEIGHT);
                 const acph = 0.5 + (windSpeed * 0.05);
                 totalHeatLoss += vol * 0.018 * (insideTemp - outsideTemp) * acph;
 
                 return Math.max(0, Math.round(totalHeatLoss));
+            };
+            
+            const renderFloorPlan = () => {
+               const scale = 5;
+               return (
+                    <svg width="800" height="600" className="border border-gray-300 bg-white">
+                        {floors.map((floor, floorIndex) => (
+                            <g key={floor} transform={`translate(50, ${50 + floorIndex * 220})`}>
+                                <text x={0} y={-10} fontSize="16" fontWeight="bold" className="uppercase">{floor} Floor</text>
+                                <rect x={0} y={0} width={dimensions.length * scale} height={20} fill={`#${getWallInsulation(`${floor}-north`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-north`)} />
+                                <text x={dimensions.length * scale / 2} y={12} textAnchor="middle" fontSize="10" fill="#1f2937">N</text>
+                                <rect x={0} y={dimensions.width * scale - 20} width={dimensions.length * scale} height={20} fill={`#${getWallInsulation(`${floor}-south`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-south`)} />
+                                <text x={dimensions.length * scale / 2} y={dimensions.width * scale - 8} textAnchor="middle" fontSize="10" fill="#1f2937">S</text>
+                                <rect x={0} y={20} width={20} height={dimensions.width * scale - 40} fill={`#${getWallInsulation(`${floor}-west`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-west`)} />
+                                <text x={10} y={dimensions.width * scale / 2} textAnchor="middle" fontSize="10" fill="#1f2937">W</text>
+                                <rect x={dimensions.length * scale - 20} y={20} width={20} height={dimensions.width * scale - 40} fill={`#${getWallInsulation(`${floor}-east`).color.toString(16).padStart(6, '0')}`} stroke="#1f2937" strokeWidth="2" className="cursor-pointer hover:opacity-80" onClick={() => setSelectedWall(`${floor}-east`)} />
+                                <text x={dimensions.length * scale - 10} y={dimensions.width * scale / 2} textAnchor="middle" fontSize="10" fill="#1f2937">E</text>
+                                <rect x={20} y={20} width={dimensions.length * scale - 40} height={dimensions.width * scale - 40} fill="#f3f4f6" stroke="none" />
+                                <text x={dimensions.length * scale / 2} y={dimensions.width * scale + 20} textAnchor="middle" fontSize="12">{dimensions.length}' × {dimensions.width}'</text>
+                            </g>
+                        ))}
+                    </svg>
+                );
             };
 
             return (
@@ -470,7 +450,7 @@ const { useState, useEffect, useRef } = React;
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="text-blue-600"><HomeIcon /></div>
-                                    <h1 className="text-3xl font-bold text-gray-900">HVAC Builder v2</h1>
+                                    <h1 className="text-3xl font-bold text-gray-900">HVAC Builder v3</h1>
                                 </div>
                                 <div className="bg-orange-100 px-4 py-2 rounded-lg border border-orange-300">
                                     <div className="text-xs text-orange-800 font-bold uppercase">Total Load</div>
@@ -479,25 +459,51 @@ const { useState, useEffect, useRef } = React;
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Left: 3D View */}
+                                {/* Left: View */}
                                 <div className="lg:col-span-2">
-                                    <div ref={mountRef} className="h-96 w-full border-4 border-gray-300 rounded-lg bg-blue-50"></div>
-                                    <div className="flex gap-4 mt-4 text-sm text-gray-600 justify-center">
-                                        <span>Left-Click: Rotate</span>
-                                        <span>Right-Click: Pan</span>
-                                        <span>Scroll: Zoom</span>
-                                        <span>Click Walls to Select</span>
+                                     <div className="flex gap-2 mb-4">
+                                        <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
+                                        <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
                                     </div>
+                                    
+                                    {viewMode === '3d' ? (
+                                        <>
+                                            <div ref={mountRef} className="h-96 w-full border-4 border-gray-300 rounded-lg bg-blue-50"></div>
+                                            <div className="flex gap-4 mt-4 text-sm text-gray-600 justify-center">
+                                                <span>Left-Click: Rotate</span>
+                                                <span>Right-Click: Pan</span>
+                                                <span>Scroll: Zoom</span>
+                                                <span>Click Walls to Select</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="overflow-auto h-96 border-4 border-gray-300 rounded-lg p-4">
+                                            {renderFloorPlan()}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Right: Controls */}
-                                <div className="space-y-4 h-96 overflow-y-auto pr-2">
-                                    {/* Env Controls */}
+                                <div className="space-y-4 h-[32rem] overflow-y-auto pr-2">
+                                    {/* Env Controls - RESTORED */}
                                     <div className="bg-gray-100 p-3 rounded text-sm">
                                         <h3 className="font-bold mb-2">Environment</h3>
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="grid grid-cols-2 gap-2 mb-2">
                                             <div><label>Outside °F</label><input type="number" value={outsideTemp} onChange={e=>setOutsideTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
+                                            <div><label>Inside °F</label><input type="number" value={insideTemp} onChange={e=>setInsideTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 mb-2">
+                                            <div><label>Ground °F</label><input type="number" value={groundTemp} onChange={e=>setGroundTemp(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
                                             <div><label>Wind mph</label><input type="number" value={windSpeed} onChange={e=>setWindSpeed(Number(e.target.value))} className="w-full p-1 border rounded"/></div>
+                                        </div>
+                                         <div className="mb-2">
+                                            <label>Wind Direction</label>
+                                            <select value={windDirection} onChange={(e) => setWindDirection(e.target.value)} className="w-full p-1 border rounded">
+                                                <option value="north">North</option>
+                                                <option value="south">South</option>
+                                                <option value="east">East</option>
+                                                <option value="west">West</option>
+                                            </select>
                                         </div>
                                     </div>
 
@@ -508,7 +514,8 @@ const { useState, useEffect, useRef } = React;
                                             
                                             <div className="flex gap-2 mb-3">
                                                 <button onClick={()=>setSelectionMode('exterior')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='exterior'?'bg-blue-600 text-white':'bg-white'}`}>Ext</button>
-                                                <button onClick={()=>setSelectionMode('features')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='features'?'bg-blue-600 text-white':'bg-white'}`}>Add Feature</button>
+                                                <button onClick={()=>setSelectionMode('insulation')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='insulation'?'bg-blue-600 text-white':'bg-white'}`}>Insul</button>
+                                                <button onClick={()=>setSelectionMode('features')} className={`flex-1 text-xs py-1 rounded ${selectionMode==='features'?'bg-blue-600 text-white':'bg-white'}`}>Feat.</button>
                                             </div>
 
                                             {selectionMode === 'exterior' && (
@@ -519,11 +526,22 @@ const { useState, useEffect, useRef } = React;
                                                 </div>
                                             )}
 
+                                             {selectionMode === 'insulation' && (
+                                                <div className="grid grid-cols-1 gap-1">
+                                                    {INSULATION_OPTIONS.map(m => (
+                                                        <button key={m.id} onClick={()=>setWallInsulation({...wallInsulation, [selectedWall]: m.id})} className="text-xs p-1 bg-white border rounded text-left flex justify-between">
+                                                            <span>{m.name}</span>
+                                                            <span className="text-gray-500">R-{m.rValue}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
                                             {selectionMode === 'features' && (
                                                 <div className="space-y-2">
                                                     <div className="flex gap-1">
-                                                        <button onClick={()=>addFeature('window-std')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Std Win</button>
-                                                        <button onClick={()=>addFeature('window-pic')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Pic Win</button>
+                                                        <button onClick={()=>addFeature('window-std')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Std</button>
+                                                        <button onClick={()=>addFeature('window-pic')} className="flex-1 bg-green-100 p-1 text-xs border border-green-300 rounded hover:bg-green-200">+ Pic</button>
                                                         <button onClick={()=>addFeature('door')} className="flex-1 bg-amber-100 p-1 text-xs border border-amber-300 rounded hover:bg-amber-200">+ Door</button>
                                                     </div>
                                                     
@@ -557,6 +575,7 @@ const { useState, useEffect, useRef } = React;
     </script>
 </body>
 </html>
+
 
 
 
