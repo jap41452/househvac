@@ -159,6 +159,21 @@ class OrbitControls {
     }
 }
 
+// Helper for Textures (Compass Text)
+function createTextTexture(text, color = 'black') {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = color;
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 32, 32);
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
 function HouseBuilder() {
     const [dimensions, setDimensions] = useState({ length: 40, width: 30 });
     const [selectedWall, setSelectedWall] = useState(null);
@@ -219,7 +234,6 @@ function HouseBuilder() {
         const scene = new THREE.Scene();
         sceneRef.current = scene;
 
-        // FIXED: Using container size, not fixed 800x600
         const width = mountRef.current.clientWidth;
         const height = 600;
 
@@ -263,6 +277,56 @@ function HouseBuilder() {
         gridHelper.material.opacity = 0.3;
         scene.add(gridHelper);
 
+        // CREATE COMPASS ON GROUND
+        const compassGroup = new THREE.Group();
+        
+        // North Line (Red)
+        const nMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+        const nGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.5,0), new THREE.Vector3(0,0.5,-15)]);
+        const nLine = new THREE.Line(nGeo, nMat);
+        
+        // Arrow Head
+        const arrowGeo = new THREE.ConeGeometry(1, 2, 8);
+        const arrowMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const arrowHead = new THREE.Mesh(arrowGeo, arrowMat);
+        arrowHead.position.set(0, 0.5, -15);
+        arrowHead.rotation.x = -Math.PI/2;
+        
+        // Other Directions (Gray)
+        const crossMat = new THREE.LineBasicMaterial({ color: 0x444444 });
+        const ewGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-10,0.5,0), new THREE.Vector3(10,0.5,0)]);
+        const sGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.5,0), new THREE.Vector3(0,0.5,10)]);
+        const ewLine = new THREE.Line(ewGeo, crossMat);
+        const sLine = new THREE.Line(sGeo, crossMat);
+
+        // Labels
+        const labelSize = 5;
+        const labels = [
+            { text: 'N', pos: [0, 0.6, -18], color: '#AA0000' },
+            { text: 'S', pos: [0, 0.6, 12], color: '#444444' },
+            { text: 'E', pos: [12, 0.6, 0], color: '#444444' },
+            { text: 'W', pos: [-12, 0.6, 0], color: '#444444' }
+        ];
+
+        labels.forEach(l => {
+            const tex = createTextTexture(l.text, l.color);
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(labelSize, labelSize), mat);
+            mesh.position.set(...l.pos);
+            mesh.rotation.x = -Math.PI/2;
+            compassGroup.add(mesh);
+        });
+
+        compassGroup.add(nLine);
+        compassGroup.add(arrowHead);
+        compassGroup.add(ewLine);
+        compassGroup.add(sLine);
+        
+        // Position Compass slightly offset so it's visible even if house is on top
+        compassGroup.position.set(-35, 0, 35); 
+        scene.add(compassGroup);
+
+
         buildHouse();
 
         function animate() {
@@ -271,7 +335,6 @@ function HouseBuilder() {
         }
         animate();
 
-        // ADDED: Window Resize Handler
         const handleResize = () => {
             if (!mountRef.current) return;
             const newWidth = mountRef.current.clientWidth;
@@ -340,8 +403,9 @@ function HouseBuilder() {
         Object.values(wallMeshesRef.current).forEach(mesh => sceneRef.current.remove(mesh));
         roofMeshesRef.current.forEach(mesh => sceneRef.current.remove(mesh));
         sceneRef.current.children = sceneRef.current.children.filter(c => 
-            c.type !== 'Mesh' || (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || c.geometry.type === 'BoxGeometry' && c.scale.y === 0.5 
+            c.type !== 'Mesh' || (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || (c.geometry.type === 'BoxGeometry' && c.scale.y === 0.5) || c.type === 'Group' || c.type === 'Line'
         );
+        // Note: Modified filter to keep the Compass Group (Group type)
 
         wallMeshesRef.current = {};
         roofMeshesRef.current = [];
@@ -590,7 +654,6 @@ function HouseBuilder() {
 
     const renderFloorPlan = () => {
        const scale = 5;
-       // Updated HEIGHT to 800 to fully show 2nd floor
        return (
             <svg width="100%" height="800" viewBox={`0 0 800 800`} className="border border-gray-300 bg-white">
                 {floors.map((floor, floorIndex) => (
@@ -857,10 +920,10 @@ function HouseBuilder() {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<HouseBuilder />);
 
-
     </script>
 </body>
 </html>
+
 
 
 
