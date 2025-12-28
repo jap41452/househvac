@@ -14,46 +14,46 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef } = React;
 
-        // Insulation options with R-values and properties
+        // Insulation options (Cost removed)
         const INSULATION_OPTIONS = [
-            { id: 'none', name: 'No Insulation', rValue: 0, cost: 0, color: 0xe5e7eb },
-            { id: 'fiberglass-r13', name: 'Fiberglass Batt R-13', rValue: 13, cost: 0.50, color: 0xfbbf24 },
-            { id: 'fiberglass-r19', name: 'Fiberglass Batt R-19', rValue: 19, cost: 0.75, color: 0xf59e0b },
-            { id: 'fiberglass-r21', name: 'Fiberglass Batt R-21', rValue: 21, cost: 0.90, color: 0xd97706 },
-            { id: 'spray-foam-r25', name: 'Spray Foam R-25', rValue: 25, cost: 2.00, color: 0x10b981 },
-            { id: 'spray-foam-r30', name: 'Spray Foam R-30', rValue: 30, cost: 2.50, color: 0x059669 },
-            { id: 'rigid-foam-r20', name: 'Rigid Foam R-20', rValue: 20, cost: 1.50, color: 0x3b82f6 },
+            { id: 'none', name: 'No Insulation', rValue: 2, color: 0xe5e7eb }, // R-2 base for uninsulated structure
+            { id: 'fiberglass-r13', name: 'Fiberglass Batt R-13', rValue: 13, color: 0xfbbf24 },
+            { id: 'fiberglass-r19', name: 'Fiberglass Batt R-19', rValue: 19, color: 0xf59e0b },
+            { id: 'fiberglass-r21', name: 'Fiberglass Batt R-21', rValue: 21, color: 0xd97706 },
+            { id: 'spray-foam-r25', name: 'Spray Foam R-25', rValue: 25, color: 0x10b981 },
+            { id: 'spray-foam-r30', name: 'Spray Foam R-30', rValue: 30, color: 0x059669 },
+            { id: 'rigid-foam-r20', name: 'Rigid Foam R-20', rValue: 20, color: 0x3b82f6 },
         ];
 
-        // Wall exterior material options
+        // Wall exterior materials (Cost removed)
         const EXTERIOR_MATERIALS = [
-            { id: 'brick-red', name: 'Red Brick', cost: 8.50, color: 0x8B4513 },
-            { id: 'brick-tan', name: 'Tan Brick', cost: 8.50, color: 0xD2B48C },
-            { id: 'vinyl-white', name: 'White Vinyl Siding', cost: 3.50, color: 0xF5F5F5 },
-            { id: 'vinyl-gray', name: 'Gray Vinyl Siding', cost: 3.50, color: 0x808080 },
-            { id: 'vinyl-beige', name: 'Beige Vinyl Siding', cost: 3.50, color: 0xF5F5DC },
-            { id: 'clapboard-white', name: 'White Clapboard', cost: 5.00, color: 0xFAFAFA },
-            { id: 'clapboard-blue', name: 'Blue Clapboard', cost: 5.00, color: 0x4682B4 },
-            { id: 'stucco-white', name: 'White Stucco', cost: 6.00, color: 0xFFFFF0 },
-            { id: 'stucco-tan', name: 'Tan Stucco', cost: 6.00, color: 0xD2B48C },
-            { id: 'stone-gray', name: 'Gray Stone', cost: 12.00, color: 0x708090 },
+            { id: 'brick-red', name: 'Red Brick', color: 0x8B4513 },
+            { id: 'brick-tan', name: 'Tan Brick', color: 0xD2B48C },
+            { id: 'vinyl-white', name: 'White Vinyl Siding', color: 0xF5F5F5 },
+            { id: 'vinyl-gray', name: 'Gray Vinyl Siding', color: 0x808080 },
+            { id: 'vinyl-beige', name: 'Beige Vinyl Siding', color: 0xF5F5DC },
+            { id: 'clapboard-white', name: 'White Clapboard', color: 0xFAFAFA },
+            { id: 'clapboard-blue', name: 'Blue Clapboard', color: 0x4682B4 },
+            { id: 'stucco-white', name: 'White Stucco', color: 0xFFFFF0 },
+            { id: 'stucco-tan', name: 'Tan Stucco', color: 0xD2B48C },
+            { id: 'stone-gray', name: 'Gray Stone', color: 0x708090 },
         ];
 
-        // Roof material options
+        // Roof materials (Cost removed)
         const ROOF_MATERIALS = [
-            { id: 'asphalt-black', name: 'Black Asphalt Shingles', cost: 3.50, color: 0x2F2F2F, reflectivity: 0.05 },
-            { id: 'asphalt-gray', name: 'Gray Asphalt Shingles', cost: 3.50, color: 0x808080, reflectivity: 0.15 },
-            { id: 'asphalt-brown', name: 'Brown Asphalt Shingles', cost: 3.50, color: 0x654321, reflectivity: 0.10 },
-            { id: 'metal-white', name: 'White Metal Roof', cost: 8.00, color: 0xF5F5F5, reflectivity: 0.65 },
-            { id: 'metal-black', name: 'Black Metal Roof', cost: 8.00, color: 0x1C1C1C, reflectivity: 0.05 },
-            { id: 'metal-silver', name: 'Silver Metal Roof', cost: 8.00, color: 0xC0C0C0, reflectivity: 0.55 },
-            { id: 'tile-terracotta', name: 'Terracotta Tiles', cost: 12.00, color: 0xE2725B, reflectivity: 0.25 },
-            { id: 'tile-concrete', name: 'Concrete Tiles', cost: 10.00, color: 0x999999, reflectivity: 0.30 },
+            { id: 'asphalt-black', name: 'Black Asphalt Shingles', color: 0x2F2F2F, reflectivity: 0.05 },
+            { id: 'asphalt-gray', name: 'Gray Asphalt Shingles', color: 0x808080, reflectivity: 0.15 },
+            { id: 'asphalt-brown', name: 'Brown Asphalt Shingles', color: 0x654321, reflectivity: 0.10 },
+            { id: 'metal-white', name: 'White Metal Roof', color: 0xF5F5F5, reflectivity: 0.65 },
+            { id: 'metal-black', name: 'Black Metal Roof', color: 0x1C1C1C, reflectivity: 0.05 },
+            { id: 'metal-silver', name: 'Silver Metal Roof', color: 0xC0C0C0, reflectivity: 0.55 },
+            { id: 'tile-terracotta', name: 'Terracotta Tiles', color: 0xE2725B, reflectivity: 0.25 },
+            { id: 'tile-concrete', name: 'Concrete Tiles', color: 0x999999, reflectivity: 0.30 },
         ];
 
-        // Simple icon components
+        // Icons
         const HomeIcon = () => (
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -66,19 +66,14 @@
             </svg>
         );
 
-        const WindIcon = () => (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        const FireIcon = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
             </svg>
         );
 
-        const SunIcon = () => (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-        );
-
-        // Custom OrbitControls implementation
+        // Custom OrbitControls (Included from previous code block)
         class OrbitControls {
             constructor(camera, domElement) {
                 this.camera = camera;
@@ -231,7 +226,7 @@
             }
         }
 
-function HouseBuilder() {
+        function HouseBuilder() {
             const [dimensions, setDimensions] = useState({ length: 40, width: 30 });
             const [selectedWall, setSelectedWall] = useState(null);
             const [wallInsulation, setWallInsulation] = useState({});
@@ -239,6 +234,14 @@ function HouseBuilder() {
             const [roofMaterial, setRoofMaterial] = useState('asphalt-gray');
             const [viewMode, setViewMode] = useState('3d');
             const [selectionMode, setSelectionMode] = useState('exterior');
+            
+            // New Environmental State
+            const [outsideTemp, setOutsideTemp] = useState(32); // Freezing
+            const [groundTemp, setGroundTemp] = useState(50);   // Standard constant
+            const [insideTemp, setInsideTemp] = useState(70);   // Standard comfort
+            const [windSpeed, setWindSpeed] = useState(10);     // mph
+            const [windDirection, setWindDirection] = useState('north');
+
             const mountRef = useRef(null);
             const sceneRef = useRef(null);
             const cameraRef = useRef(null);
@@ -248,8 +251,7 @@ function HouseBuilder() {
             const roofMeshesRef = useRef([]);
 
             const WALL_HEIGHT = 9;
-            // UPDATED: Tripled the pitch (was 1/8)
-            const ROOF_PITCH = 3/8; 
+            const ROOF_PITCH = 3/8;
             const floors = ['basement', 'first', 'second'];
 
             useEffect(() => {
@@ -325,7 +327,6 @@ function HouseBuilder() {
                     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
                     raycaster.setFromCamera(mouse, camera);
-                    // Intersect with walls
                     const intersects = raycaster.intersectObjects(Object.values(wallMeshesRef.current));
 
                     if (intersects.length > 0) {
@@ -347,7 +348,7 @@ function HouseBuilder() {
                 if (viewMode === '3d') {
                     buildHouse();
                 }
-            }, [dimensions, wallInsulation, wallExterior, roofMaterial]); // Added dependencies
+            }, [dimensions, wallInsulation, wallExterior, roofMaterial]);
 
             const buildHouse = () => {
                 if (!sceneRef.current) return;
@@ -366,7 +367,7 @@ function HouseBuilder() {
                 
                 // Build each floor
                 floors.forEach((floor, floorIndex) => {
-                    // UPDATED: Shift Y down by one wall height so Basement (index 0) is at -9
+                    // Shift Y down so Basement is at -9
                     const floorY = (floorIndex - 1) * WALL_HEIGHT;
 
                     // Floor platform
@@ -378,143 +379,79 @@ function HouseBuilder() {
                     floorMesh.receiveShadow = true;
                     sceneRef.current.add(floorMesh);
 
-                    // --- Walls ---
+                    // Walls
+                    const directions = [
+                        { id: 'north', pos: [0, floorY + WALL_HEIGHT / 2, -dimensions.width / 2], dim: [dimensions.length, WALL_HEIGHT, wallThickness] },
+                        { id: 'south', pos: [0, floorY + WALL_HEIGHT / 2, dimensions.width / 2], dim: [dimensions.length, WALL_HEIGHT, wallThickness] },
+                        { id: 'east', pos: [dimensions.length / 2, floorY + WALL_HEIGHT / 2, 0], dim: [wallThickness, WALL_HEIGHT, dimensions.width] },
+                        { id: 'west', pos: [-dimensions.length / 2, floorY + WALL_HEIGHT / 2, 0], dim: [wallThickness, WALL_HEIGHT, dimensions.width] },
+                    ];
 
-                    // North wall
-                    const northWallId = `${floor}-north`;
-                    const northExterior = getWallExterior(northWallId);
-                    const northGeometry = new THREE.BoxGeometry(dimensions.length, WALL_HEIGHT, wallThickness);
-                    const northMaterial = new THREE.MeshStandardMaterial({ color: northExterior.color });
-                    const northWall = new THREE.Mesh(northGeometry, northMaterial);
-                    northWall.position.set(0, floorY + WALL_HEIGHT / 2, -dimensions.width / 2);
-                    northWall.castShadow = true;
-                    northWall.receiveShadow = true;
-                    northWall.userData.wallId = northWallId;
-                    sceneRef.current.add(northWall);
-                    wallMeshesRef.current[northWallId] = northWall;
+                    directions.forEach(dir => {
+                        const wallId = `${floor}-${dir.id}`;
+                        const exterior = getWallExterior(wallId);
+                        const geometry = new THREE.BoxGeometry(...dir.dim);
+                        const material = new THREE.MeshStandardMaterial({ color: exterior.color });
+                        const mesh = new THREE.Mesh(geometry, material);
+                        mesh.position.set(...dir.pos);
+                        mesh.castShadow = true;
+                        mesh.receiveShadow = true;
+                        mesh.userData.wallId = wallId;
+                        sceneRef.current.add(mesh);
+                        wallMeshesRef.current[wallId] = mesh;
+                    });
 
-                    // South wall
-                    const southWallId = `${floor}-south`;
-                    const southExterior = getWallExterior(southWallId);
-                    const southGeometry = new THREE.BoxGeometry(dimensions.length, WALL_HEIGHT, wallThickness);
-                    const southMaterial = new THREE.MeshStandardMaterial({ color: southExterior.color });
-                    const southWall = new THREE.Mesh(southGeometry, southMaterial);
-                    southWall.position.set(0, floorY + WALL_HEIGHT / 2, dimensions.width / 2);
-                    southWall.castShadow = true;
-                    southWall.receiveShadow = true;
-                    southWall.userData.wallId = southWallId;
-                    sceneRef.current.add(southWall);
-                    wallMeshesRef.current[southWallId] = southWall;
-
-                    // East wall
-                    const eastWallId = `${floor}-east`;
-                    const eastExterior = getWallExterior(eastWallId);
-                    const eastGeometry = new THREE.BoxGeometry(wallThickness, WALL_HEIGHT, dimensions.width);
-                    const eastMaterial = new THREE.MeshStandardMaterial({ color: eastExterior.color });
-                    const eastWall = new THREE.Mesh(eastGeometry, eastMaterial);
-                    eastWall.position.set(dimensions.length / 2, floorY + WALL_HEIGHT / 2, 0);
-                    eastWall.castShadow = true;
-                    eastWall.receiveShadow = true;
-                    eastWall.userData.wallId = eastWallId;
-                    sceneRef.current.add(eastWall);
-                    wallMeshesRef.current[eastWallId] = eastWall;
-
-                    // West wall
-                    const westWallId = `${floor}-west`;
-                    const westExterior = getWallExterior(westWallId);
-                    const westGeometry = new THREE.BoxGeometry(wallThickness, WALL_HEIGHT, dimensions.width);
-                    const westMaterial = new THREE.MeshStandardMaterial({ color: westExterior.color });
-                    const westWall = new THREE.Mesh(westGeometry, westMaterial);
-                    westWall.position.set(-dimensions.length / 2, floorY + WALL_HEIGHT / 2, 0);
-                    westWall.castShadow = true;
-                    westWall.receiveShadow = true;
-                    westWall.userData.wallId = westWallId;
-                    sceneRef.current.add(westWall);
-                    wallMeshesRef.current[westWallId] = westWall;
-
-                    // ADDED: Demarcation Line (Trim) between stories
-                    // We place a slightly wider, thin white box at the top of the wall
+                    // Demarcation Line
                     const trimHeight = 0.4;
                     const trimGeometry = new THREE.BoxGeometry(dimensions.length + 0.8, trimHeight, dimensions.width + 0.8);
-                    const trimMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF }); // White trim
+                    const trimMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
                     const trimMesh = new THREE.Mesh(trimGeometry, trimMaterial);
                     trimMesh.position.set(0, floorY + WALL_HEIGHT, 0);
-                    trimMesh.castShadow = true;
-                    trimMesh.receiveShadow = true;
                     sceneRef.current.add(trimMesh);
-                    roofMeshesRef.current.push(trimMesh); // Track it here to delete on rebuild
+                    roofMeshesRef.current.push(trimMesh);
                 });
 
-                // Build proper gable roof
-                // UPDATED: Roof sits on top of the stack. Since we shifted everything down by 1 wall height,
-                // the top of the 2nd floor is at: (2 - 1) * 9 + 9 = 18. 
-                // Alternatively: (floors.length - 1) * WALL_HEIGHT
+                // Roof
                 const roofY = (floors.length - 1) * WALL_HEIGHT; 
-                
                 const roofRise = (dimensions.width / 2) * ROOF_PITCH;
                 const roofMat = ROOF_MATERIALS.find(m => m.id === roofMaterial);
                 const roofColor = roofMat ? roofMat.color : 0x808080;
                 
-                // Gable Shape
+                // Gables
                 const gableShape = new THREE.Shape();
                 gableShape.moveTo(-dimensions.width / 2, 0);
                 gableShape.lineTo(dimensions.width / 2, 0);
                 gableShape.lineTo(0, roofRise);
                 gableShape.lineTo(-dimensions.width / 2, 0);
-                
                 const gableGeometry = new THREE.ShapeGeometry(gableShape);
-                const gableMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0xE8E8E8,
-                    side: THREE.DoubleSide 
-                });
+                const gableMaterial = new THREE.MeshStandardMaterial({ color: 0xE8E8E8, side: THREE.DoubleSide });
                 
-                // West gable
                 const westGable = new THREE.Mesh(gableGeometry, gableMaterial);
                 westGable.position.set(-dimensions.length / 2, roofY, 0);
                 westGable.rotation.y = Math.PI / 2;
-                westGable.castShadow = true;
-                westGable.receiveShadow = true;
                 sceneRef.current.add(westGable);
                 roofMeshesRef.current.push(westGable);
                 
-                // East gable
                 const eastGable = new THREE.Mesh(gableGeometry, gableMaterial);
                 eastGable.position.set(dimensions.length / 2, roofY, 0);
                 eastGable.rotation.y = -Math.PI / 2;
-                eastGable.castShadow = true;
-                eastGable.receiveShadow = true;
                 sceneRef.current.add(eastGable);
                 roofMeshesRef.current.push(eastGable);
 
-                // Roof Planes
+                // Slopes
                 const roofSlantLength = Math.sqrt(Math.pow(dimensions.width / 2, 2) + Math.pow(roofRise, 2));
                 const roofAngle = Math.atan2(roofRise, dimensions.width / 2);
+                const roofMaterialMesh = new THREE.MeshStandardMaterial({ color: roofColor, side: THREE.DoubleSide, roughness: 0.9 });
                 
-                const roofMaterialMesh = new THREE.MeshStandardMaterial({ 
-                    color: roofColor,
-                    side: THREE.DoubleSide,
-                    roughness: 0.9
-                });
-                
-                // North roof
-                const northRoofGeom = new THREE.PlaneGeometry(dimensions.length + 1, roofSlantLength); // +1 for overhang
-                const northRoof = new THREE.Mesh(northRoofGeom, roofMaterialMesh);
-                // Pitch UP towards center (minus angle)
+                const northRoof = new THREE.Mesh(new THREE.PlaneGeometry(dimensions.length + 1, roofSlantLength), roofMaterialMesh);
                 northRoof.position.set(0, roofY + roofRise / 2, -dimensions.width / 4);
                 northRoof.rotation.x = -Math.PI / 2 - roofAngle; 
-                northRoof.castShadow = true;
-                northRoof.receiveShadow = true;
                 sceneRef.current.add(northRoof);
                 roofMeshesRef.current.push(northRoof);
 
-                // South roof
-                const southRoofGeom = new THREE.PlaneGeometry(dimensions.length + 1, roofSlantLength);
-                const southRoof = new THREE.Mesh(southRoofGeom, roofMaterialMesh.clone());
-                // Pitch UP towards center (plus angle)
+                const southRoof = new THREE.Mesh(new THREE.PlaneGeometry(dimensions.length + 1, roofSlantLength), roofMaterialMesh.clone());
                 southRoof.position.set(0, roofY + roofRise / 2, dimensions.width / 4);
                 southRoof.rotation.x = -Math.PI / 2 + roofAngle;
-                southRoof.castShadow = true;
-                southRoof.receiveShadow = true;
                 sceneRef.current.add(southRoof);
                 roofMeshesRef.current.push(southRoof);
             };
@@ -522,15 +459,21 @@ function HouseBuilder() {
             const getWallData = () => {
                 const walls = [];
                 floors.forEach(floor => {
-                    walls.push({ id: `${floor}-north`, floor, orientation: 'north', length: dimensions.length, height: WALL_HEIGHT, area: dimensions.length * WALL_HEIGHT });
-                    walls.push({ id: `${floor}-south`, floor, orientation: 'south', length: dimensions.length, height: WALL_HEIGHT, area: dimensions.length * WALL_HEIGHT });
-                    walls.push({ id: `${floor}-east`, floor, orientation: 'east', length: dimensions.width, height: WALL_HEIGHT, area: dimensions.width * WALL_HEIGHT });
-                    walls.push({ id: `${floor}-west`, floor, orientation: 'west', length: dimensions.width, height: WALL_HEIGHT, area: dimensions.width * WALL_HEIGHT });
+                    const directions = ['north', 'south', 'east', 'west'];
+                    directions.forEach(dir => {
+                        const isLong = dir === 'north' || dir === 'south';
+                        walls.push({
+                            id: `${floor}-${dir}`,
+                            floor,
+                            orientation: dir,
+                            length: isLong ? dimensions.length : dimensions.width,
+                            height: WALL_HEIGHT,
+                            area: (isLong ? dimensions.length : dimensions.width) * WALL_HEIGHT
+                        });
+                    });
                 });
                 return walls;
             };
-
-            const walls = getWallData();
 
             const handleMaterialSelect = (materialId) => {
                 if (selectionMode === 'exterior' && selectedWall) {
@@ -550,34 +493,56 @@ function HouseBuilder() {
                 return INSULATION_OPTIONS.find(opt => opt.id === insulationId);
             };
 
-            const getTotals = () => {
-                let totalCost = 0;
-                let totalArea = 0;
-                let weightedRValue = 0;
+            // ---- HVAC CALCULATIONS ----
+            const calculateHVAC = () => {
+                const walls = getWallData();
+                let totalHeatLoss = 0;
 
+                // 1. Conductive Loss (Walls)
                 walls.forEach(wall => {
                     const insulation = getWallInsulation(wall.id);
-                    totalCost += insulation.cost * wall.area;
-                    totalArea += wall.area;
-                    weightedRValue += insulation.rValue * wall.area;
+                    // R-Value = Base Structure (3) + Insulation
+                    let rValue = insulation.rValue + 3; 
+                    let tempDiff = 0;
+
+                    if (wall.floor === 'basement') {
+                        tempDiff = insideTemp - groundTemp;
+                    } else {
+                        tempDiff = insideTemp - outsideTemp;
+                        // Wind Chill Factor: If wall faces wind direction, reduce effective R-value by 15% due to scrubbing
+                        if (wall.orientation === windDirection) {
+                            rValue = rValue * 0.85;
+                        }
+                    }
+
+                    // BTU/hr = (Area / R) * DeltaT
+                    const heatLoss = (wall.area / rValue) * tempDiff;
+                    totalHeatLoss += Math.max(0, heatLoss);
                 });
 
-                return {
-                    totalCost: totalCost.toFixed(2),
-                    totalArea: totalArea.toFixed(0),
-                    averageRValue: totalArea > 0 ? (weightedRValue / totalArea).toFixed(1) : 0
-                };
+                // 2. Conductive Loss (Roof) - Approx Area
+                // Using flat area for simplicity of heat calculation (standard practice is ceiling plane)
+                const roofArea = dimensions.length * dimensions.width;
+                const roofRValue = 40; // Assumed Attic R-40
+                const roofDiff = insideTemp - outsideTemp;
+                totalHeatLoss += Math.max(0, (roofArea / roofRValue) * roofDiff);
+
+                // 3. Infiltration (Air Leakage)
+                // Formula: BTU = Volume * 0.018 * DeltaT * AirChangesPerHour
+                const volume = dimensions.length * dimensions.width * (floors.length * WALL_HEIGHT);
+                
+                // Base ACPH is 0.5. Add 0.05 per mph of wind
+                const acph = 0.5 + (windSpeed * 0.05); 
+                const infiltrationLoss = volume * 0.018 * (insideTemp - outsideTemp) * acph;
+                
+                totalHeatLoss += Math.max(0, infiltrationLoss);
+
+                return Math.round(totalHeatLoss);
             };
 
-            const totals = getTotals();
+            const btuRating = calculateHVAC();
 
-            // ... (Render Floor Plan Logic remains the same, omitted for brevity but required if you didn't paste the full helper functions above)
             const renderFloorPlan = () => {
-               // ... existing floor plan code ...
-               // Simplest to just return a placeholder if you don't need it changed, 
-               // but typically in React singular component replacements, you need the whole function.
-               // Assuming the previous renderFloorPlan logic is still valid.
-               
                const scale = 5;
                return (
                     <svg width="800" height="600" className="border border-gray-300 bg-white">
@@ -600,125 +565,150 @@ function HouseBuilder() {
                 );
             };
 
-            // Return JSX (Same as before)
             return (
                 <div className="min-h-screen bg-gray-50 p-8">
                     <div className="max-w-7xl mx-auto">
                         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="text-blue-600"><HomeIcon /></div>
-                                <h1 className="text-3xl font-bold text-gray-900">Multi-Story House Builder</h1>
+                                <h1 className="text-3xl font-bold text-gray-900">Multi-Story House Builder & HVAC Calculator</h1>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Length (feet)</label>
-                                    <input type="number" value={dimensions.length} onChange={(e) => setDimensions(prev => ({ ...prev, length: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="10" max="100" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Width (feet)</label>
-                                    <input type="number" value={dimensions.width} onChange={(e) => setDimensions(prev => ({ ...prev, width: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="10" max="100" />
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2 mb-6">
-                                <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
-                                <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
-                            </div>
-
-                            <div className="mb-6 flex justify-center">
-                                {viewMode === '3d' ? (
-                                    <div>
-                                        <div ref={mountRef} className="border-4 border-gray-300 rounded-lg"></div>
-                                        <p className="text-sm text-gray-600 mt-2 text-center">Left-click + drag to rotate • Right-click + drag to pan • Scroll to zoom • Click walls to select</p>
+                            {/* Main Grid Layout */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Left Column: 3D/Floor Plan */}
+                                <div className="lg:col-span-2">
+                                    <div className="flex gap-2 mb-4">
+                                        <button onClick={() => setViewMode('3d')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === '3d' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>3D View</button>
+                                        <button onClick={() => setViewMode('floor')} className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'floor' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Floor Plan View</button>
                                     </div>
-                                ) : (
-                                    renderFloorPlan()
-                                )}
-                            </div>
 
-                            {selectedWall && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                    <h3 className="font-semibold text-blue-900 mb-2">Selected: {selectedWall.replace('-', ' ').toUpperCase()}</h3>
-                                    <div className="text-sm text-blue-700">Exterior: {getWallExterior(selectedWall).name}</div>
-                                    <div className="text-sm text-blue-700">Insulation: {getWallInsulation(selectedWall).name} (R-{getWallInsulation(selectedWall).rValue})</div>
-                                </div>
-                            )}
-
-                            <div className="flex gap-2 mb-6">
-                                <button onClick={() => setSelectionMode('exterior')} className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${selectionMode === 'exterior' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Wall Exterior</button>
-                                <button onClick={() => setSelectionMode('insulation')} className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${selectionMode === 'insulation' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Wall Insulation</button>
-                            </div>
-
-                            {selectionMode === 'exterior' && (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Select Wall Exterior Material</h3>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                                        {EXTERIOR_MATERIALS.map(material => (
-                                            <button key={material.id} onClick={() => handleMaterialSelect(material.id)} disabled={!selectedWall} className={`p-4 rounded-lg border-2 transition-all ${selectedWall && wallExterior[selectedWall] === material.id ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-green-400'} ${!selectedWall ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                                                <div className="w-full h-12 rounded mb-2 border border-gray-300" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
-                                                <div className="text-xs font-medium text-gray-900">{material.name}</div>
-                                                <div className="text-xs text-gray-600">${material.cost}/sq ft</div>
-                                            </button>
-                                        ))}
+                                    <div className="mb-6 flex justify-center">
+                                        {viewMode === '3d' ? (
+                                            <div>
+                                                <div ref={mountRef} className="border-4 border-gray-300 rounded-lg"></div>
+                                                <p className="text-xs text-gray-500 mt-2 text-center">Drag to rotate • Right-click to pan • Scroll to zoom</p>
+                                            </div>
+                                        ) : (
+                                            renderFloorPlan()
+                                        )}
+                                    </div>
+                                    
+                                    {/* Dimensions */}
+                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Length (ft)</label>
+                                            <input type="number" value={dimensions.length} onChange={(e) => setDimensions(prev => ({ ...prev, length: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Width (ft)</label>
+                                            <input type="number" value={dimensions.width} onChange={(e) => setDimensions(prev => ({ ...prev, width: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" min="10" max="100" />
+                                        </div>
                                     </div>
                                 </div>
-                            )}
 
-                            {selectionMode === 'insulation' && (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Select Insulation Type</h3>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                        {INSULATION_OPTIONS.map(option => (
-                                            <button key={option.id} onClick={() => handleMaterialSelect(option.id)} disabled={!selectedWall} className={`p-4 rounded-lg border-2 transition-all ${selectedWall && wallInsulation[selectedWall] === option.id ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:border-blue-400'} ${!selectedWall ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                                                <div className="w-full h-8 rounded mb-2" style={{ backgroundColor: `#${option.color.toString(16).padStart(6, '0')}` }}></div>
-                                                <div className="text-sm font-medium text-gray-900">{option.name}</div>
-                                                <div className="text-xs text-gray-600">R-Value: {option.rValue}</div>
-                                                <div className="text-xs text-gray-600">${option.cost}/sq ft</div>
-                                            </button>
-                                        ))}
+                                {/* Right Column: HVAC Controls & Materials */}
+                                <div className="space-y-6">
+                                    
+                                    {/* HVAC CALCULATOR PANEL */}
+                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-5">
+                                        <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+                                            <FireIcon /> Heating Req.
+                                        </h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Outside Temp (°F)</label>
+                                                    <input type="number" value={outsideTemp} onChange={(e) => setOutsideTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Ground Temp (°F)</label>
+                                                    <input type="number" value={groundTemp} onChange={(e) => setGroundTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Inside Temp (°F)</label>
+                                                    <input type="number" value={insideTemp} onChange={(e) => setInsideTemp(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-orange-800 mb-1">Wind Speed (mph)</label>
+                                                    <input type="number" value={windSpeed} onChange={(e) => setWindSpeed(Number(e.target.value))} className="w-full px-2 py-1 border border-orange-200 rounded text-sm" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-xs font-semibold text-orange-800 mb-1">Wind Direction</label>
+                                                <select value={windDirection} onChange={(e) => setWindDirection(e.target.value)} className="w-full px-2 py-1 border border-orange-200 rounded text-sm bg-white">
+                                                    <option value="north">North</option>
+                                                    <option value="south">South</option>
+                                                    <option value="east">East</option>
+                                                    <option value="west">West</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="mt-4 pt-4 border-t border-orange-200">
+                                                <div className="text-sm text-orange-800">Required Furnace Rating:</div>
+                                                <div className="text-3xl font-black text-orange-600">{btuRating.toLocaleString()} BTU/hr</div>
+                                                <div className="text-xs text-orange-700 mt-1 italic">Includes Wall/Roof conduction + Wind Infiltration</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
 
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-3">Roof Material</h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
-                                    {ROOF_MATERIALS.map(material => (
-                                        <button key={material.id} onClick={() => setRoofMaterial(material.id)} className={`p-4 rounded-lg border-2 transition-all ${roofMaterial === material.id ? 'border-purple-600 bg-purple-50' : 'border-gray-300 hover:border-purple-400'} cursor-pointer`}>
-                                            <div className="w-full h-12 rounded mb-2 border border-gray-300" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
-                                            <div className="text-xs font-medium text-gray-900">{material.name}</div>
-                                            <div className="text-xs text-gray-600">${material.cost}/sq ft</div>
-                                            <div className="text-xs text-gray-600">Reflect: {(material.reflectivity * 100).toFixed(0)}%</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                                    {/* Selection Controls */}
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        {selectedWall ? (
+                                            <div className="mb-4">
+                                                <h3 className="font-semibold text-gray-900">Edit: {selectedWall.toUpperCase()}</h3>
+                                                <p className="text-xs text-gray-600 mb-2">Current R-Value: {getWallInsulation(selectedWall).rValue + 3} (Total)</p>
+                                            </div>
+                                        ) : (
+                                            <div className="mb-4 text-sm text-gray-500 italic">Select a wall to edit materials</div>
+                                        )}
 
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="bg-gray-100 rounded-lg p-4">
-                                    <div className="text-sm text-gray-600 mb-1">Total Wall Area</div>
-                                    <div className="text-2xl font-bold text-gray-900">{totals.totalArea} sq ft</div>
-                                </div>
-                                <div className="bg-gray-100 rounded-lg p-4">
-                                    <div className="text-sm text-gray-600 mb-1">Average R-Value</div>
-                                    <div className="text-2xl font-bold text-gray-900">R-{totals.averageRValue}</div>
-                                </div>
-                                <div className="bg-gray-100 rounded-lg p-4">
-                                    <div className="text-sm text-gray-600 mb-1">Total Insulation Cost</div>
-                                    <div className="text-2xl font-bold text-gray-900">${totals.totalCost}</div>
-                                </div>
-                            </div>
+                                        <div className="flex gap-2 mb-4">
+                                            <button onClick={() => setSelectionMode('exterior')} className={`flex-1 px-2 py-1 rounded text-sm font-medium transition-colors ${selectionMode === 'exterior' ? 'bg-gray-800 text-white' : 'bg-gray-200'}`}>Exterior</button>
+                                            <button onClick={() => setSelectionMode('insulation')} className={`flex-1 px-2 py-1 rounded text-sm font-medium transition-colors ${selectionMode === 'insulation' ? 'bg-gray-800 text-white' : 'bg-gray-200'}`}>Insulation</button>
+                                        </div>
 
-                            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                                <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
-                                    <ThermometerIcon />
-                                    Future HVAC Calculations
-                                </h3>
-                                <div className="text-sm text-green-700 space-y-1">
-                                    <div className="flex items-center gap-2"><SunIcon /><span>Solar heat gain through walls and windows</span></div>
-                                    <div className="flex items-center gap-2"><WindIcon /><span>Wind load and infiltration calculations</span></div>
-                                    <div className="flex items-center gap-2"><ThermometerIcon /><span>Night radiation and thermal mass effects</span></div>
+                                        <div className="h-64 overflow-y-auto">
+                                            {selectionMode === 'exterior' ? (
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {EXTERIOR_MATERIALS.map(material => (
+                                                        <button key={material.id} onClick={() => handleMaterialSelect(material.id)} disabled={!selectedWall} className={`p-2 rounded border text-left ${selectedWall && wallExterior[selectedWall] === material.id ? 'border-green-600 bg-green-50' : 'border-gray-300'} ${!selectedWall && 'opacity-50'}`}>
+                                                            <div className="w-full h-4 rounded mb-1" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
+                                                            <div className="text-xs font-medium">{material.name}</div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {INSULATION_OPTIONS.map(option => (
+                                                        <button key={option.id} onClick={() => handleMaterialSelect(option.id)} disabled={!selectedWall} className={`p-2 rounded border text-left flex justify-between items-center ${selectedWall && wallInsulation[selectedWall] === option.id ? 'border-blue-600 bg-blue-50' : 'border-gray-300'} ${!selectedWall && 'opacity-50'}`}>
+                                                            <div>
+                                                                <div className="text-xs font-medium">{option.name}</div>
+                                                                <div className="text-xs text-gray-500">R-{option.rValue}</div>
+                                                            </div>
+                                                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: `#${option.color.toString(16).padStart(6, '0')}` }}></div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Roof Material Selector */}
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h3 className="text-sm font-semibold mb-2">Roof Material</h3>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {ROOF_MATERIALS.map(material => (
+                                                <button key={material.id} onClick={() => setRoofMaterial(material.id)} className={`p-2 rounded border text-left ${roofMaterial === material.id ? 'border-purple-600 bg-purple-50' : 'border-gray-300'}`}>
+                                                    <div className="w-full h-4 rounded mb-1" style={{ backgroundColor: `#${material.color.toString(16).padStart(6, '0')}` }}></div>
+                                                    <div className="text-xs font-medium">{material.name}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -727,12 +717,14 @@ function HouseBuilder() {
             );
         }
 
-
-        // Render the app
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<HouseBuilder />);
+
+
+
     </script>
 </body>
 </html>
+
 
 
