@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div id="root"></div>
@@ -65,6 +66,9 @@ const SnowIcon = () => (<svg className="w-6 h-6" fill="none" stroke="currentColo
 const TrashIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 const SunIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>);
 const MoonIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>);
+const DownloadIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>);
+const UploadIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>);
+const FileTextIcon = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>);
 
 // OrbitControls (Standard)
 class OrbitControls {
@@ -176,6 +180,7 @@ function createTextTexture(text, color = 'black') {
 
 function HouseBuilder() {
     const [dimensions, setDimensions] = useState({ length: 40, width: 30 });
+    const [numStories, setNumStories] = useState(2);
     const [selectedWall, setSelectedWall] = useState(null);
     const [wallInsulation, setWallInsulation] = useState({});
     const [wallExterior, setWallExterior] = useState({});
@@ -198,8 +203,6 @@ function HouseBuilder() {
     const [latitude, setLatitude] = useState(45); 
     const [nightCondition, setNightCondition] = useState('clear'); 
     const [atticRValue, setAtticRValue] = useState(40);
-    
-    // New: Furnace Efficiency
     const [furnaceEfficiency, setFurnaceEfficiency] = useState(80); 
 
     const [humidity, setHumidity] = useState(50); 
@@ -215,10 +218,20 @@ function HouseBuilder() {
     const roofMeshesRef = useRef([]);
     const sunLightRef = useRef(null);
     const ambientLightRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     const WALL_HEIGHT = 9;
     const ROOF_PITCH = 3/8;
-    const floors = ['basement', 'first', 'second'];
+    
+    const getFloors = () => {
+        const base = ['basement'];
+        if(numStories >= 1) base.push('first');
+        if(numStories >= 2) base.push('second');
+        if(numStories >= 3) base.push('third');
+        return base;
+    };
+    
+    const floors = getFloors();
 
     useEffect(() => {
         if (hvacMode === 'cooling') {
@@ -280,26 +293,22 @@ function HouseBuilder() {
         // CREATE COMPASS ON GROUND
         const compassGroup = new THREE.Group();
         
-        // North Line (Red)
         const nMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
         const nGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.5,0), new THREE.Vector3(0,0.5,-15)]);
         const nLine = new THREE.Line(nGeo, nMat);
         
-        // Arrow Head
         const arrowGeo = new THREE.ConeGeometry(1, 2, 8);
         const arrowMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const arrowHead = new THREE.Mesh(arrowGeo, arrowMat);
         arrowHead.position.set(0, 0.5, -15);
         arrowHead.rotation.x = -Math.PI/2;
         
-        // Other Directions (Gray)
         const crossMat = new THREE.LineBasicMaterial({ color: 0x444444 });
         const ewGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-10,0.5,0), new THREE.Vector3(10,0.5,0)]);
         const sGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.5,0), new THREE.Vector3(0,0.5,10)]);
         const ewLine = new THREE.Line(ewGeo, crossMat);
         const sLine = new THREE.Line(sGeo, crossMat);
 
-        // Labels
         const labelSize = 5;
         const labels = [
             { text: 'N', pos: [0, 0.6, -18], color: '#AA0000' },
@@ -322,10 +331,8 @@ function HouseBuilder() {
         compassGroup.add(ewLine);
         compassGroup.add(sLine);
         
-        // Position Compass slightly offset so it's visible even if house is on top
         compassGroup.position.set(-35, 0, 35); 
         scene.add(compassGroup);
-
 
         buildHouse();
 
@@ -396,7 +403,7 @@ function HouseBuilder() {
 
     useEffect(() => {
         if (viewMode === '3d') buildHouse();
-    }, [dimensions, wallInsulation, wallExterior, roofMaterial, wallFeatures]);
+    }, [dimensions, numStories, wallInsulation, wallExterior, roofMaterial, wallFeatures]);
 
     const buildHouse = () => {
         if (!sceneRef.current) return;
@@ -405,7 +412,6 @@ function HouseBuilder() {
         sceneRef.current.children = sceneRef.current.children.filter(c => 
             c.type !== 'Mesh' || (c.geometry.type === 'PlaneGeometry' && c.rotation.x === -Math.PI/2) || (c.geometry.type === 'BoxGeometry' && c.scale.y === 0.5) || c.type === 'Group' || c.type === 'Line'
         );
-        // Note: Modified filter to keep the Compass Group (Group type)
 
         wallMeshesRef.current = {};
         roofMeshesRef.current = [];
@@ -652,10 +658,170 @@ function HouseBuilder() {
     const displayUnit = hvacMode === 'heating' ? 'BTU/hr' : 'Tons';
     const themeColor = hvacMode === 'heating' ? 'orange' : 'cyan';
 
+    // --- DATA EXPORT / IMPORT FUNCTIONS ---
+
+    const exportJSON = () => {
+        const data = {
+            timestamp: new Date().toISOString(),
+            config: {
+                dimensions, numStories, wallInsulation, wallExterior, roofMaterial, wallFeatures, 
+                hvacMode, outsideTemp, groundTemp, insideTemp, windSpeed, windDirection,
+                timeOfDay, sunVisible, latitude, nightCondition, atticRValue, furnaceEfficiency,
+                humidity, occupants, appliances
+            }
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `house_project_${new Date().getTime()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const importJSON = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (data.config) {
+                    const c = data.config;
+                    if(c.dimensions) setDimensions(c.dimensions);
+                    if(c.numStories) setNumStories(c.numStories);
+                    if(c.wallInsulation) setWallInsulation(c.wallInsulation);
+                    if(c.wallExterior) setWallExterior(c.wallExterior);
+                    if(c.roofMaterial) setRoofMaterial(c.roofMaterial);
+                    if(c.wallFeatures) setWallFeatures(c.wallFeatures);
+                    if(c.hvacMode) setHvacMode(c.hvacMode);
+                    if(c.outsideTemp) setOutsideTemp(c.outsideTemp);
+                    if(c.groundTemp) setGroundTemp(c.groundTemp);
+                    if(c.insideTemp) setInsideTemp(c.insideTemp);
+                    if(c.windSpeed) setWindSpeed(c.windSpeed);
+                    if(c.windDirection) setWindDirection(c.windDirection);
+                    if(c.timeOfDay) setTimeOfDay(c.timeOfDay);
+                    if(c.sunVisible !== undefined) setSunVisible(c.sunVisible);
+                    if(c.latitude) setLatitude(c.latitude);
+                    if(c.nightCondition) setNightCondition(c.nightCondition);
+                    if(c.atticRValue) setAtticRValue(c.atticRValue);
+                    if(c.furnaceEfficiency) setFurnaceEfficiency(c.furnaceEfficiency);
+                    if(c.humidity) setHumidity(c.humidity);
+                    if(c.occupants) setOccupants(c.occupants);
+                    if(c.appliances) setAppliances(c.appliances);
+                }
+            } catch (err) {
+                alert("Error parsing JSON file");
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = null; // reset input
+    };
+
+    const exportCSV = () => {
+        const walls = getWallData();
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // Header Info
+        csvContent += `Report Date,${new Date().toLocaleString()}\n`;
+        csvContent += `Mode,${hvacMode.toUpperCase()}\n`;
+        csvContent += `Total Load,${displayValue} ${displayUnit}\n`;
+        csvContent += `Efficiency,${furnaceEfficiency}%\n`;
+        csvContent += `Design Temps,In: ${insideTemp}F | Out: ${outsideTemp}F | Ground: ${groundTemp}F\n\n`;
+
+        // Table Headers
+        csvContent += "Component ID,Type,Gross Area (sqft),Net Area (sqft),R-Value,Delta T,Load (BTU/hr)\n";
+
+        let runningTotal = 0;
+
+        // Wall & Features Logic (Similar to calculateHVAC but logging rows)
+        walls.forEach(wall => {
+            const features = wallFeatures[wall.id] || [];
+            let featureArea = 0;
+            
+            let tempDiff = 0;
+            if (hvacMode === 'heating') {
+                tempDiff = wall.floor === 'basement' ? (insideTemp - groundTemp) : (insideTemp - outsideTemp);
+            } else {
+                tempDiff = wall.floor === 'basement' ? (groundTemp - insideTemp) : (outsideTemp - insideTemp);
+            }
+            tempDiff = Math.max(0, tempDiff);
+
+            features.forEach(f => {
+                const stats = FEATURE_STATS[f.type];
+                const area = stats.width * stats.height;
+                featureArea += area;
+                let uValue = 1 / stats.rValue;
+                if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') uValue *= 1.15; 
+                let load = area * uValue * tempDiff;
+
+                // Simple Solar Gain logic for CSV display (simplified from main calc for brevity)
+                let solarLoad = 0;
+                if (hvacMode === 'cooling' && f.type.includes('window') && timeOfDay === 'day' && sunVisible) {
+                    // Re-calc solar portion
+                    const SHGC = 0.5;
+                    let solarIntensity = 200;
+                    if (wall.orientation === 'east' || wall.orientation === 'west') solarIntensity *= 1.2;
+                    else if (wall.orientation === 'south') solarIntensity *= Math.sin(latitude * Math.PI/180);
+                    else if (wall.orientation === 'north') solarIntensity *= 0.2;
+                    solarLoad = (area * SHGC * solarIntensity);
+                    load += solarLoad;
+                } else if (hvacMode === 'heating' && f.type.includes('window') && timeOfDay === 'day' && sunVisible && wall.orientation === 'south') {
+                     const solarIntensity = 20 * Math.sin(latitude * Math.PI/180);
+                     solarLoad = -(area * solarIntensity);
+                     load += solarLoad;
+                }
+
+                csvContent += `${wall.id} - ${stats.name},Window/Door,${area},${area},${stats.rValue},${tempDiff.toFixed(1)},${Math.round(load)}\n`;
+                runningTotal += load;
+            });
+
+            const netWallArea = Math.max(0, wall.area - featureArea);
+            const insulation = getWallInsulation(wall.id);
+            let rValue = insulation.rValue + 3;
+            if (hvacMode === 'heating' && wall.floor !== 'basement' && wall.orientation === windDirection) rValue *= 0.85;
+
+            const wallLoad = (netWallArea / rValue) * tempDiff;
+            csvContent += `${wall.id},Wall,${wall.area},${netWallArea},${rValue.toFixed(1)},${tempDiff.toFixed(1)},${Math.round(wallLoad)}\n`;
+            runningTotal += wallLoad;
+        });
+
+        // Roof
+        const roofArea = dimensions.length * dimensions.width;
+        let effectiveAtticR = atticRValue;
+        if (hvacMode === 'heating' && timeOfDay === 'night' && nightCondition === 'clear') effectiveAtticR *= 0.8;
+        let roofTempDiff = hvacMode === 'heating' ? Math.max(0, insideTemp - outsideTemp) : Math.max(0, outsideTemp - insideTemp); 
+        // Note: Simplified roof temp logic for CSV report to avoid complexity
+        const roofLoad = (roofArea / effectiveAtticR) * roofTempDiff;
+        csvContent += `Roof,Ceiling,${roofArea},${roofArea},${effectiveAtticR},${roofTempDiff.toFixed(1)},${Math.round(roofLoad)}\n`;
+
+        // Infiltration
+        const volume = dimensions.length * dimensions.width * (floors.length * WALL_HEIGHT);
+        const acph = 0.5 + (windSpeed * 0.05);
+        const infiltrationLoad = volume * 0.018 * Math.abs(insideTemp - outsideTemp) * acph;
+        csvContent += `Infiltration (ACH: ${acph.toFixed(2)}),Air,N/A,N/A,N/A,${Math.abs(insideTemp - outsideTemp)},${Math.round(infiltrationLoad)}\n`;
+
+        // Internals
+        if (hvacMode === 'cooling') {
+             const peopleLoad = occupants * 450;
+             const applianceLoad = appliances === 'high' ? 3000 : (appliances === 'medium' ? 1500 : 500);
+             csvContent += `Occupants (${occupants}),Internal,N/A,N/A,N/A,N/A,${peopleLoad}\n`;
+             csvContent += `Appliances (${appliances}),Internal,N/A,N/A,N/A,N/A,${applianceLoad}\n`;
+        }
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `hvac_report_${new Date().getTime()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     const renderFloorPlan = () => {
        const scale = 5;
        return (
-            <svg width="100%" height="800" viewBox={`0 0 800 800`} className="border border-gray-300 bg-white">
+            <svg width="100%" height={220 * floors.length} viewBox={`0 0 800 ${220 * floors.length}`} className="border border-gray-300 bg-white">
                 {floors.map((floor, floorIndex) => (
                     <g key={floor} transform={`translate(50, ${50 + floorIndex * 220})`}>
                         <text x={0} y={-10} fontSize="16" fontWeight="bold" className="uppercase">{floor} Floor</text>
@@ -704,6 +870,15 @@ function HouseBuilder() {
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-600 mb-1">Width (ft)</label>
                                     <input type="number" value={dimensions.width} onChange={(e) => setDimensions(prev => ({ ...prev, width: parseInt(e.target.value) || 0 }))} className="w-24 px-2 py-1 text-sm border border-gray-300 rounded" min="10" max="100" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">Stories</label>
+                                    <select value={numStories} onChange={(e) => setNumStories(parseInt(e.target.value))} className="w-24 px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                                        <option value="1">1 Story</option>
+                                        <option value="2">2 Stories</option>
+                                        <option value="3">3 Stories</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -825,6 +1000,20 @@ function HouseBuilder() {
                                         <div className={`text-3xl font-black text-${themeColor}-600`}>{displayValue} {displayUnit}</div>
                                         <div className={`text-xs text-${themeColor}-700 mt-1 italic`}>
                                             {hvacMode === 'heating' ? 'Input Rating Required' : 'Total Heat Gain'}
+                                        </div>
+                                        
+                                        {/* New Data Buttons */}
+                                        <div className="flex gap-2 mt-4 pt-2 border-t border-gray-200">
+                                            <button onClick={exportJSON} title="Export Save File" className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded border border-gray-300">
+                                                <DownloadIcon />
+                                            </button>
+                                            <label className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded border border-gray-300 cursor-pointer" title="Import Save File">
+                                                <UploadIcon />
+                                                <input type="file" ref={fileInputRef} onChange={importJSON} className="hidden" accept=".json" />
+                                            </label>
+                                            <button onClick={exportCSV} title="Download Report (CSV)" className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded flex items-center justify-center gap-2">
+                                                <FileTextIcon /> Export CSV
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
